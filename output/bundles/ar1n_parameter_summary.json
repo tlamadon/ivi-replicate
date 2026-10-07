@@ -1,0 +1,1183 @@
+{
+  "metadata": {
+    "title": "simulation-ar1n: fitted parameter export",
+    "dgp_spec": "specs/compute-simulation-ar1n.md",
+    "models_spec": "specs/models.md",
+    "source_dir": "results/_simulation_ar1n_sweep",
+    "panel": {
+      "N": 30000,
+      "T": 6,
+      "obs_seed": 11
+    },
+    "produced_by": "experiments/_export_ar1n_parameter_summary.py",
+    "n_fits": 13
+  },
+  "ai_prompt": "This JSON catalogues the fitted parameter vector for every model in the\nsimulation-ar1n sweep (a 1-D AR(1) latent state-space model with normal\nemission). Each entry in `fits` reports a 13-element parameter dict in\nthe canonical ordering listed under `parameter_schema.param_names`.\nThe mapping from those parameters to the generative model is:\n\n(1) Law of motion (transition density):\n    z_t | z_{t-1} ~ Normal( mu(z_{t-1}), sigma(z_{t-1})^2 ),\n    with\n        mu(z)    = mu0 + mu1 * z + mu2 * z^2,\n        sigma(z) = softplus(sigma0 + sigma1 * z + sigma2 * z^2),\n    where softplus(x) = log(1 + exp(x)).\n    NB: sigma uses softplus, NOT exp.\n\n(2) Initial-state density:\n    z_1 ~ SinhArcsinh( loc=0, scale=softplus(z1_log_std),\n                       skew=z1_skew, tailweight=exp(z1_log_tail) ).\n    The scalar SinhArcsinh density is\n        z = loc + scale * sinh( tailweight * ( asinh(eps) + skew ) ),\n        eps ~ Normal(0, 1).\n    For the AR1+Normal sweep, z1_skew = 0 and z1_log_tail = 0 are pinned\n    (exp(0) = 1), so z_1 reduces to Normal(0, softplus(z1_log_std)^2).\n    NB: scale uses softplus on z1_log_std; tailweight uses exp on\n    z1_log_tail. The 'log_std' suffix is historical and misleading ---\n    it is pre-softplus, not pre-exp.\n\n(3) Measurement-error density:\n    y_t = z_t + eps_t,   eps_t ~ SinhArcsinh( loc=0,\n                                              scale=exp(log_sigma_eps),\n                                              skew=0,\n                                              tailweight=exp(log_beta) ).\n    For the AR1+Normal sweep, log_beta = 0 is pinned (exp(0) = 1), so\n    eps_t reduces to Normal(0, exp(log_sigma_eps)^2). The 'log' prefix\n    here IS log: sigma_eps = exp(log_sigma_eps) (no softplus).\n\n(4) Heterogeneity parameters (alpha0, log_alpha1):\n    Pinned at 0 for this DGP family --- ignore.\n\nThe 8 free coordinates under Model A (used by every VI and IVI fit) are\n    {mu0, mu1, mu2, sigma0, sigma1, sigma2, z1_log_std, log_sigma_eps}.\nThe MLE no-error fit (Model B in `specs/compute-simulation-ar1n.md`)\ndrops log_sigma_eps and keeps only the 7 free prior coordinates --- the\nemission collapses to y_t = z_t exactly (no measurement error).\n\nEach entry in `fits` reports:\n  - method:           'vi_only' | 'picard' | 'anderson' | 'mle_noerror'\n  - encoder:          variational family for VI / IVI fits (None for MLE).\n  - parameters:       raw 13-element dict in canonical order.\n  - parameters_derived: human-friendly transforms (sigma_z1, sigma_eps,\n                        beta, mu/sigma polynomial coefficients).\n  - L2_to_truth:      Euclidean distance on the 8 free coordinates.\n  - diagnostics:      ELBO / IWAE / SMC bounds at VI / IVI / truth.\n\nThe `truth` block at top level gives the same in raw + derived form for\nthe DGP that simulated the observed panel (N=30000, T=6, obs_seed=11).\n",
+  "parameter_schema": {
+    "param_names": [
+      "alpha0",
+      "log_alpha1",
+      "mu0",
+      "mu1",
+      "mu2",
+      "sigma0",
+      "sigma1",
+      "sigma2",
+      "z1_log_std",
+      "z1_skew",
+      "z1_log_tail",
+      "log_sigma_eps",
+      "log_beta"
+    ],
+    "free_keys_model_a": [
+      "mu0",
+      "mu1",
+      "mu2",
+      "sigma0",
+      "sigma1",
+      "sigma2",
+      "z1_log_std",
+      "log_sigma_eps"
+    ],
+    "free_keys_model_b": [
+      "mu0",
+      "mu1",
+      "mu2",
+      "sigma0",
+      "sigma1",
+      "sigma2",
+      "z1_log_std"
+    ],
+    "softplus_params": [
+      "sigma0",
+      "sigma1",
+      "sigma2",
+      "z1_log_std"
+    ],
+    "exp_params": [
+      "log_sigma_eps",
+      "log_beta",
+      "z1_log_tail",
+      "log_alpha1"
+    ],
+    "description": "Parameter names use mixed conventions for historical reasons: prior std uses softplus (sigma(z), z1 scale), while emission scale + all tailweights use exp. See the ai_prompt field for the full mapping."
+  },
+  "truth": {
+    "parameters": {
+      "alpha0": 0.0,
+      "log_alpha1": 0.0,
+      "mu0": 0.0,
+      "mu1": 0.9,
+      "mu2": 0.0,
+      "sigma0": -1.48,
+      "sigma1": 0.0,
+      "sigma2": 0.0,
+      "z1_log_std": -0.733,
+      "z1_skew": 0.0,
+      "z1_log_tail": 0.0,
+      "log_sigma_eps": -1.47,
+      "log_beta": 0.0
+    },
+    "parameters_derived": {
+      "mu_coeffs": {
+        "a0": 0.0,
+        "a1": 0.9,
+        "a2": 0.0
+      },
+      "sigma_pre_softplus_coeffs": {
+        "b0": -1.48,
+        "b1": 0.0,
+        "b2": 0.0
+      },
+      "sigma_at_zero": 0.20509174415876139,
+      "sigma_z1": 0.39235651775896635,
+      "z1_skew": 0.0,
+      "z1_tailweight": 1.0,
+      "sigma_eps": 0.22992548518672384,
+      "beta_tailweight": 1.0,
+      "alpha0": 0.0,
+      "log_alpha1": 0.0
+    }
+  },
+  "fits": [
+    {
+      "label": "IVI Anderson alpha=0.6 (mean-field, lr=0.01)",
+      "family": "ivi",
+      "method": "anderson",
+      "encoder": "mean_field",
+      "alpha": 0.6,
+      "lr": 0.01,
+      "hidden_dim": 32,
+      "n_epochs_inner": 8000,
+      "n_iters_outer": 10,
+      "n_epochs_vi_obs": 10000,
+      "source_file": "results/_simulation_ar1n_sweep/anderson_meanfield_alpha0.60_m4_ep8000_lr1e-2_crn.json",
+      "theta_role": "final_theta (IVI binding-equation fixed point)",
+      "free_keys": [
+        "mu0",
+        "mu1",
+        "mu2",
+        "sigma0",
+        "sigma1",
+        "sigma2",
+        "z1_log_std",
+        "log_sigma_eps"
+      ],
+      "parameters": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": -0.0005711232292402405,
+        "mu1": 0.9002188449486678,
+        "mu2": -0.0014787116340908629,
+        "sigma0": -1.4829062398444426,
+        "sigma1": 0.005090344496770194,
+        "sigma2": -0.0022839910712214705,
+        "z1_log_std": -0.7335033470054327,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.4667838865188951,
+        "log_beta": 0.0
+      },
+      "parameters_derived": {
+        "mu_coeffs": {
+          "a0": -0.0005711232292402405,
+          "a1": 0.9002188449486678,
+          "a2": -0.0014787116340908629
+        },
+        "sigma_pre_softplus_coeffs": {
+          "b0": -1.4829062398444426,
+          "b1": 0.005090344496770194,
+          "b2": -0.0022839910712214705
+        },
+        "sigma_at_zero": 0.2045534850923986,
+        "sigma_z1": 0.3921931909289395,
+        "z1_skew": 0.0,
+        "z1_tailweight": 1.0,
+        "sigma_eps": 0.23066614201908597,
+        "beta_tailweight": 1.0,
+        "alpha0": 0.0,
+        "log_alpha1": 0.0
+      },
+      "L2_to_truth_free": 0.0072616705671076165,
+      "diagnostics": {
+        "elbo_at_vi": -2.5834813117980957,
+        "iwae_at_vi": -2.5373663902282715,
+        "elbo_at_truth": -2.4735043048858643,
+        "iwae_at_truth": -2.4581902027130127,
+        "smc_log_p_at_truth": -2.46506667137146,
+        "elbo_at_ivi": -2.4736886024475098,
+        "iwae_at_ivi": -2.458237409591675
+      },
+      "truth_tagged_in_source": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0,
+        "mu1": 0.9,
+        "mu2": 0.0,
+        "sigma0": -1.48,
+        "sigma1": 0.0,
+        "sigma2": 0.0,
+        "z1_log_std": -0.733,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.47,
+        "log_beta": 0.0
+      }
+    },
+    {
+      "label": "IVI Anderson alpha=0.6 (mean-field, lr=0.001)",
+      "family": "ivi",
+      "method": "anderson",
+      "encoder": "mean_field",
+      "alpha": 0.6,
+      "lr": 0.001,
+      "hidden_dim": 32,
+      "n_epochs_inner": 8000,
+      "n_iters_outer": 10,
+      "n_epochs_vi_obs": 10000,
+      "source_file": "results/_simulation_ar1n_sweep/anderson_meanfield_alpha0.60_m4_ep8000_lr1e-3_crn.json",
+      "theta_role": "final_theta (IVI binding-equation fixed point)",
+      "free_keys": [
+        "mu0",
+        "mu1",
+        "mu2",
+        "sigma0",
+        "sigma1",
+        "sigma2",
+        "z1_log_std",
+        "log_sigma_eps"
+      ],
+      "parameters": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0,
+        "mu1": 0.8992854280537856,
+        "mu2": 0.0,
+        "sigma0": -1.4760367664401346,
+        "sigma1": 0.0,
+        "sigma2": 0.0,
+        "z1_log_std": -0.7324000285111631,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.8360716313838223,
+        "log_beta": 0.0
+      },
+      "parameters_derived": {
+        "mu_coeffs": {
+          "a0": 0.0,
+          "a1": 0.8992854280537856,
+          "a2": 0.0
+        },
+        "sigma_pre_softplus_coeffs": {
+          "b0": -1.4760367664401346,
+          "b1": 0.0,
+          "b2": 0.0
+        },
+        "sigma_at_zero": 0.2058278235573178,
+        "sigma_z1": 0.3925512700095122,
+        "z1_skew": 0.0,
+        "z1_tailweight": 1.0,
+        "sigma_eps": 0.15944254654719184,
+        "beta_tailweight": 1.0,
+        "alpha0": 0.0,
+        "log_alpha1": 0.0
+      },
+      "L2_to_truth_free": 0.005100266508905154,
+      "diagnostics": {
+        "elbo_at_vi": -1.5184823274612427,
+        "iwae_at_vi": -1.4892709255218506,
+        "elbo_at_ivi": -1.4639341831207275,
+        "iwae_at_ivi": -1.4472122192382812,
+        "elbo_at_truth": -1.4640523195266724,
+        "iwae_at_truth": -1.4472401142120361,
+        "smc_log_p_at_truth": -1.4561712741851807
+      },
+      "truth_tagged_in_source": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0,
+        "mu1": 0.9,
+        "mu2": 0.0,
+        "sigma0": -1.48,
+        "sigma1": 0.0,
+        "sigma2": 0.0,
+        "z1_log_std": -0.733,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.833,
+        "log_beta": 0.0
+      }
+    },
+    {
+      "label": "MLE (no measurement error)",
+      "family": "mle_no_measurement_error",
+      "method": "mle_noerror",
+      "encoder": null,
+      "alpha": null,
+      "lr": null,
+      "hidden_dim": null,
+      "n_epochs_inner": null,
+      "n_iters_outer": null,
+      "n_epochs_vi_obs": null,
+      "source_file": "results/_simulation_ar1n_sweep/mle_noerror_lbfgs.json",
+      "theta_role": "final_theta (MLE under degenerate y_t=z_t emission; log_sigma_eps does not exist)",
+      "free_keys": [
+        "mu0",
+        "mu1",
+        "mu2",
+        "sigma0",
+        "sigma1",
+        "sigma2",
+        "z1_log_std"
+      ],
+      "parameters": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0010182554826826428,
+        "mu1": 0.6911673111948828,
+        "mu2": -0.0027324090607104804,
+        "sigma0": -0.8430802734364488,
+        "sigma1": 0.0005387309210969105,
+        "sigma2": 0.008299228088739398,
+        "z1_log_std": -0.54909122740703,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": null,
+        "log_beta": 0.0
+      },
+      "parameters_derived": {
+        "mu_coeffs": {
+          "a0": 0.0010182554826826428,
+          "a1": 0.6911673111948828,
+          "a2": -0.0027324090607104804
+        },
+        "sigma_pre_softplus_coeffs": {
+          "b0": -0.8430802734364488,
+          "b1": 0.0005387309210969105,
+          "b2": 0.008299228088739398
+        },
+        "sigma_at_zero": 0.35794208881772116,
+        "sigma_z1": 0.4558250648225539,
+        "z1_skew": 0.0,
+        "z1_tailweight": 1.0,
+        "sigma_eps": null,
+        "note_emission": "log_sigma_eps absent --- this is Model B (no measurement error). y_t = z_t exactly; no transitory shock to model.",
+        "beta_tailweight": 1.0,
+        "alpha0": 0.0,
+        "log_alpha1": 0.0
+      },
+      "L2_to_truth_free": 0.695110017880187,
+      "diagnostics": {
+        "logp_at_mle": -2.5990693361990775,
+        "logp_at_truth": -5.564334173522529
+      },
+      "truth_tagged_in_source": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0,
+        "mu1": 0.9,
+        "mu2": 0.0,
+        "sigma0": -1.48,
+        "sigma1": 0.0,
+        "sigma2": 0.0,
+        "z1_log_std": -0.733,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.47,
+        "log_beta": 0.0
+      }
+    },
+    {
+      "label": "IVI Picard alpha=0.6 (mean-field, lr=0.01)",
+      "family": "ivi",
+      "method": "picard",
+      "encoder": "mean_field",
+      "alpha": 0.6,
+      "lr": 0.01,
+      "hidden_dim": 32,
+      "n_epochs_inner": 8000,
+      "n_iters_outer": 10,
+      "n_epochs_vi_obs": 10000,
+      "source_file": "results/_simulation_ar1n_sweep/picard_meanfield_alpha0.60_ep8000_lr1e-2_crn.json",
+      "theta_role": "final_theta (IVI binding-equation fixed point)",
+      "free_keys": [
+        "mu0",
+        "mu1",
+        "mu2",
+        "sigma0",
+        "sigma1",
+        "sigma2",
+        "z1_log_std",
+        "log_sigma_eps"
+      ],
+      "parameters": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": -0.0005811165588966104,
+        "mu1": 0.9002766251564027,
+        "mu2": -0.0009893418755382306,
+        "sigma0": -1.4698239803314206,
+        "sigma1": 0.0017767088600521676,
+        "sigma2": -0.0020167594688246023,
+        "z1_log_std": -0.7350115776062011,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.4620634078979493,
+        "log_beta": 0.0
+      },
+      "parameters_derived": {
+        "mu_coeffs": {
+          "a0": -0.0005811165588966104,
+          "a1": 0.9002766251564027,
+          "a2": -0.0009893418755382306
+        },
+        "sigma_pre_softplus_coeffs": {
+          "b0": -1.4698239803314206,
+          "b1": 0.0017767088600521676,
+          "b2": -0.0020167594688246023
+        },
+        "sigma_at_zero": 0.2069864943318756,
+        "sigma_z1": 0.39170413032460416,
+        "z1_skew": 0.0,
+        "z1_tailweight": 1.0,
+        "sigma_eps": 0.23175757061706087,
+        "beta_tailweight": 1.0,
+        "alpha0": 0.0,
+        "log_alpha1": 0.0
+      },
+      "L2_to_truth_free": 0.013386722652044864,
+      "diagnostics": {
+        "elbo_at_vi": -2.5834813117980957,
+        "iwae_at_vi": -2.5373663902282715,
+        "elbo_at_truth": -2.4735043048858643,
+        "iwae_at_truth": -2.4581902027130127,
+        "smc_log_p_at_truth": -2.46506667137146,
+        "elbo_at_ivi": -2.474083662033081,
+        "iwae_at_ivi": -2.45835280418396
+      },
+      "truth_tagged_in_source": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0,
+        "mu1": 0.9,
+        "mu2": 0.0,
+        "sigma0": -1.48,
+        "sigma1": 0.0,
+        "sigma2": 0.0,
+        "z1_log_std": -0.733,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.47,
+        "log_beta": 0.0
+      }
+    },
+    {
+      "label": "IVI Picard alpha=1.0 (mean-field, lr=0.01)",
+      "family": "ivi",
+      "method": "picard",
+      "encoder": "mean_field",
+      "alpha": 1.0,
+      "lr": 0.01,
+      "hidden_dim": 32,
+      "n_epochs_inner": 8000,
+      "n_iters_outer": 10,
+      "n_epochs_vi_obs": 10000,
+      "source_file": "results/_simulation_ar1n_sweep/picard_meanfield_alpha1.00_ep8000_lr1e-2_crn.json",
+      "theta_role": "final_theta (IVI binding-equation fixed point)",
+      "free_keys": [
+        "mu0",
+        "mu1",
+        "mu2",
+        "sigma0",
+        "sigma1",
+        "sigma2",
+        "z1_log_std",
+        "log_sigma_eps"
+      ],
+      "parameters": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": -0.0007386012875940651,
+        "mu1": 0.9001171588897705,
+        "mu2": -0.00045398552902042866,
+        "sigma0": -1.483743965625763,
+        "sigma1": 0.0001163051747425925,
+        "sigma2": -0.0017702076693240087,
+        "z1_log_std": -0.732819676399231,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.4664232730865479,
+        "log_beta": 0.0
+      },
+      "parameters_derived": {
+        "mu_coeffs": {
+          "a0": -0.0007386012875940651,
+          "a1": 0.9001171588897705,
+          "a2": -0.00045398552902042866
+        },
+        "sigma_pre_softplus_coeffs": {
+          "b0": -1.483743965625763,
+          "b1": 0.0001163051747425925,
+          "b2": -0.0017702076693240087
+        },
+        "sigma_at_zero": 0.20439856805733958,
+        "sigma_z1": 0.3924150429572577,
+        "z1_skew": 0.0,
+        "z1_tailweight": 1.0,
+        "sigma_eps": 0.2307493383282375,
+        "beta_tailweight": 1.0,
+        "alpha0": 0.0,
+        "log_alpha1": 0.0
+      },
+      "L2_to_truth_free": 0.0055457455437078005,
+      "diagnostics": {
+        "elbo_at_vi": -2.5834813117980957,
+        "iwae_at_vi": -2.5373663902282715,
+        "elbo_at_truth": -2.4735043048858643,
+        "iwae_at_truth": -2.4581902027130127,
+        "smc_log_p_at_truth": -2.46506667137146,
+        "elbo_at_ivi": -2.473690986633301,
+        "iwae_at_ivi": -2.4582364559173584
+      },
+      "truth_tagged_in_source": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0,
+        "mu1": 0.9,
+        "mu2": 0.0,
+        "sigma0": -1.48,
+        "sigma1": 0.0,
+        "sigma2": 0.0,
+        "z1_log_std": -0.733,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.47,
+        "log_beta": 0.0
+      }
+    },
+    {
+      "label": "VI (joint-normal, lr=0.01)",
+      "family": "vi",
+      "method": "vi_only",
+      "encoder": "jn",
+      "alpha": null,
+      "lr": 0.01,
+      "hidden_dim": 32,
+      "n_epochs_inner": null,
+      "n_iters_outer": null,
+      "n_epochs_vi_obs": 10000,
+      "source_file": "results/_simulation_ar1n_sweep/vi_jointnormal_h32_ep10000_lr1e-2_crn.json",
+      "theta_role": "theta_VI_obs (VI MAP on observed panel)",
+      "free_keys": [
+        "mu0",
+        "mu1",
+        "mu2",
+        "sigma0",
+        "sigma1",
+        "sigma2",
+        "z1_log_std",
+        "log_sigma_eps"
+      ],
+      "parameters": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0003218954661861062,
+        "mu1": 0.8947827219963074,
+        "mu2": -0.0007500856299884617,
+        "sigma0": -1.4543710947036743,
+        "sigma1": -0.007594363763928413,
+        "sigma2": -0.006282627582550049,
+        "z1_log_std": -0.7286071181297302,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.4780223369598389,
+        "log_beta": 0.0
+      },
+      "parameters_derived": {
+        "mu_coeffs": {
+          "a0": 0.0003218954661861062,
+          "a1": 0.8947827219963074,
+          "a2": -0.0007500856299884617
+        },
+        "sigma_pre_softplus_coeffs": {
+          "b0": -1.4543710947036743,
+          "b1": -0.007594363763928413,
+          "b2": -0.006282627582550049
+        },
+        "sigma_at_zero": 0.20989391875493923,
+        "sigma_z1": 0.39378428554031675,
+        "z1_skew": 0.0,
+        "z1_tailweight": 1.0,
+        "sigma_eps": 0.22808832448298058,
+        "beta_tailweight": 1.0,
+        "alpha0": 0.0,
+        "log_alpha1": 0.0
+      },
+      "L2_to_truth_free": 0.029419858826013095,
+      "diagnostics": {
+        "elbo_at_vi": -2.483057737350464,
+        "iwae_at_vi": -2.458197593688965,
+        "elbo_at_truth": -2.4735043048858643,
+        "iwae_at_truth": -2.4581902027130127,
+        "smc_log_p_at_truth": -2.46506667137146
+      },
+      "truth_tagged_in_source": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0,
+        "mu1": 0.9,
+        "mu2": 0.0,
+        "sigma0": -1.48,
+        "sigma1": 0.0,
+        "sigma2": 0.0,
+        "z1_log_std": -0.733,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.47,
+        "log_beta": 0.0
+      }
+    },
+    {
+      "label": "VI (joint-normal, lr=0.001)",
+      "family": "vi",
+      "method": "vi_only",
+      "encoder": "jn",
+      "alpha": null,
+      "lr": 0.001,
+      "hidden_dim": 32,
+      "n_epochs_inner": null,
+      "n_iters_outer": null,
+      "n_epochs_vi_obs": 10000,
+      "source_file": "results/_simulation_ar1n_sweep/vi_jointnormal_h32_ep10000_lr1e-3_crn.json",
+      "theta_role": "theta_VI_obs (VI MAP on observed panel)",
+      "free_keys": [
+        "mu0",
+        "mu1",
+        "mu2",
+        "sigma0",
+        "sigma1",
+        "sigma2",
+        "z1_log_std",
+        "log_sigma_eps"
+      ],
+      "parameters": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0,
+        "mu1": 0.8980059027671814,
+        "mu2": 0.0,
+        "sigma0": -1.4697167873382568,
+        "sigma1": 0.0,
+        "sigma2": 0.0,
+        "z1_log_std": -0.7314428091049194,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.8381295204162598,
+        "log_beta": 0.0
+      },
+      "parameters_derived": {
+        "mu_coeffs": {
+          "a0": 0.0,
+          "a1": 0.8980059027671814,
+          "a2": 0.0
+        },
+        "sigma_pre_softplus_coeffs": {
+          "b0": -1.4697167873382568,
+          "b1": 0.0,
+          "b2": 0.0
+        },
+        "sigma_at_zero": 0.20700653701158234,
+        "sigma_z1": 0.39286214924782087,
+        "z1_skew": 0.0,
+        "z1_tailweight": 1.0,
+        "sigma_eps": 0.15911476886007783,
+        "beta_tailweight": 1.0,
+        "alpha0": 0.0,
+        "log_alpha1": 0.0
+      },
+      "L2_to_truth_free": 0.011766805412052899,
+      "diagnostics": {
+        "elbo_at_vi": -1.4661122560501099,
+        "iwae_at_vi": -1.4471070766448975,
+        "elbo_at_ivi": null,
+        "iwae_at_ivi": null,
+        "elbo_at_truth": -1.4640523195266724,
+        "iwae_at_truth": -1.4472401142120361,
+        "smc_log_p_at_truth": -1.4561712741851807
+      },
+      "truth_tagged_in_source": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0,
+        "mu1": 0.9,
+        "mu2": 0.0,
+        "sigma0": -1.48,
+        "sigma1": 0.0,
+        "sigma2": 0.0,
+        "z1_log_std": -0.733,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.833,
+        "log_beta": 0.0
+      }
+    },
+    {
+      "label": "VI (mean-field, lr=0.01)",
+      "family": "vi",
+      "method": "vi_only",
+      "encoder": "mean_field",
+      "alpha": null,
+      "lr": 0.01,
+      "hidden_dim": 32,
+      "n_epochs_inner": null,
+      "n_iters_outer": null,
+      "n_epochs_vi_obs": 10000,
+      "source_file": "results/_simulation_ar1n_sweep/vi_meanfield_h32_ep10000_lr1e-2_crn.json",
+      "theta_role": "theta_VI_obs (VI MAP on observed panel)",
+      "free_keys": [
+        "mu0",
+        "mu1",
+        "mu2",
+        "sigma0",
+        "sigma1",
+        "sigma2",
+        "z1_log_std",
+        "log_sigma_eps"
+      ],
+      "parameters": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.00038659878191538155,
+        "mu1": 0.7555468082427979,
+        "mu2": -0.003985677380114794,
+        "sigma0": -0.9934805035591125,
+        "sigma1": -0.0006474279798567295,
+        "sigma2": -3.717919025802985e-05,
+        "z1_log_std": -0.6054422855377197,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -2.0260963439941406,
+        "log_beta": 0.0
+      },
+      "parameters_derived": {
+        "mu_coeffs": {
+          "a0": 0.00038659878191538155,
+          "a1": 0.7555468082427979,
+          "a2": -0.003985677380114794
+        },
+        "sigma_pre_softplus_coeffs": {
+          "b0": -0.9934805035591125,
+          "b1": -0.0006474279798567295,
+          "b2": -3.717919025802985e-05
+        },
+        "sigma_at_zero": 0.3150192327316196,
+        "sigma_z1": 0.4355628972520439,
+        "z1_skew": 0.0,
+        "z1_tailweight": 1.0,
+        "sigma_eps": 0.13184921182793596,
+        "beta_tailweight": 1.0,
+        "alpha0": 0.0,
+        "log_alpha1": 0.0
+      },
+      "L2_to_truth_free": 0.7636088756533057,
+      "diagnostics": {
+        "elbo_at_vi": -2.5834813117980957,
+        "iwae_at_vi": -2.5373663902282715,
+        "elbo_at_truth": -2.4735043048858643,
+        "iwae_at_truth": -2.4581902027130127,
+        "smc_log_p_at_truth": -2.46506667137146
+      },
+      "truth_tagged_in_source": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0,
+        "mu1": 0.9,
+        "mu2": 0.0,
+        "sigma0": -1.48,
+        "sigma1": 0.0,
+        "sigma2": 0.0,
+        "z1_log_std": -0.733,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.47,
+        "log_beta": 0.0
+      }
+    },
+    {
+      "label": "VI (mean-field, lr=0.001)",
+      "family": "vi",
+      "method": "vi_only",
+      "encoder": "mean_field",
+      "alpha": null,
+      "lr": 0.001,
+      "hidden_dim": 32,
+      "n_epochs_inner": null,
+      "n_iters_outer": null,
+      "n_epochs_vi_obs": 10000,
+      "source_file": "results/_simulation_ar1n_sweep/vi_meanfield_h32_ep10000_lr1e-3_crn.json",
+      "theta_role": "theta_VI_obs (VI MAP on observed panel)",
+      "free_keys": [
+        "mu0",
+        "mu1",
+        "mu2",
+        "sigma0",
+        "sigma1",
+        "sigma2",
+        "z1_log_std",
+        "log_sigma_eps"
+      ],
+      "parameters": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0,
+        "mu1": 0.8254421949386597,
+        "mu2": 0.0,
+        "sigma0": -1.1946567296981812,
+        "sigma1": 0.0,
+        "sigma2": 0.0,
+        "z1_log_std": -0.6700879335403442,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -2.361799716949463,
+        "log_beta": 0.0
+      },
+      "parameters_derived": {
+        "mu_coeffs": {
+          "a0": 0.0,
+          "a1": 0.8254421949386597,
+          "a2": 0.0
+        },
+        "sigma_pre_softplus_coeffs": {
+          "b0": -1.1946567296981812,
+          "b1": 0.0,
+          "b2": 0.0
+        },
+        "sigma_at_zero": 0.26452184390761657,
+        "sigma_z1": 0.41321075526160206,
+        "z1_skew": 0.0,
+        "z1_tailweight": 1.0,
+        "sigma_eps": 0.09425044634121109,
+        "beta_tailweight": 1.0,
+        "alpha0": 0.0,
+        "log_alpha1": 0.0
+      },
+      "L2_to_truth_free": 0.6087419132556571,
+      "diagnostics": {
+        "elbo_at_vi": -1.5184823274612427,
+        "iwae_at_vi": -1.4892709255218506,
+        "elbo_at_ivi": null,
+        "iwae_at_ivi": null,
+        "elbo_at_truth": -1.4640523195266724,
+        "iwae_at_truth": -1.4472401142120361,
+        "smc_log_p_at_truth": -1.4561712741851807
+      },
+      "truth_tagged_in_source": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0,
+        "mu1": 0.9,
+        "mu2": 0.0,
+        "sigma0": -1.48,
+        "sigma1": 0.0,
+        "sigma2": 0.0,
+        "z1_log_std": -0.733,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.833,
+        "log_beta": 0.0
+      }
+    },
+    {
+      "label": "VI (structured Markov, lr=0.01)",
+      "family": "vi",
+      "method": "vi_only",
+      "encoder": "struct_markov",
+      "alpha": null,
+      "lr": 0.01,
+      "hidden_dim": 32,
+      "n_epochs_inner": null,
+      "n_iters_outer": null,
+      "n_epochs_vi_obs": 10000,
+      "source_file": "results/_simulation_ar1n_sweep/vi_struct_markov_h32_ep10000_lr1e-2_crn.json",
+      "theta_role": "theta_VI_obs (VI MAP on observed panel)",
+      "free_keys": [
+        "mu0",
+        "mu1",
+        "mu2",
+        "sigma0",
+        "sigma1",
+        "sigma2",
+        "z1_log_std",
+        "log_sigma_eps"
+      ],
+      "parameters": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0015460657887160778,
+        "mu1": 0.897092878818512,
+        "mu2": -0.006439859513193369,
+        "sigma0": -1.4631478786468506,
+        "sigma1": 0.020400695502758026,
+        "sigma2": -0.005228819325566292,
+        "z1_log_std": -0.7311726808547974,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.476030945777893,
+        "log_beta": 0.0
+      },
+      "parameters_derived": {
+        "mu_coeffs": {
+          "a0": 0.0015460657887160778,
+          "a1": 0.897092878818512,
+          "a2": -0.006439859513193369
+        },
+        "sigma_pre_softplus_coeffs": {
+          "b0": -1.4631478786468506,
+          "b1": 0.020400695502758026,
+          "b2": -0.005228819325566292
+        },
+        "sigma_at_zero": 0.20823811318462915,
+        "sigma_z1": 0.3929499160280525,
+        "z1_skew": 0.0,
+        "z1_tailweight": 1.0,
+        "sigma_eps": 0.228542990119377,
+        "beta_tailweight": 1.0,
+        "alpha0": 0.0,
+        "log_alpha1": 0.0
+      },
+      "L2_to_truth_free": 0.028627745080739654,
+      "diagnostics": {
+        "elbo_at_vi": -2.4636738300323486,
+        "iwae_at_vi": -2.457911252975464,
+        "elbo_at_truth": -2.4735043048858643,
+        "iwae_at_truth": -2.4581902027130127,
+        "smc_log_p_at_truth": -2.46506667137146
+      },
+      "truth_tagged_in_source": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0,
+        "mu1": 0.9,
+        "mu2": 0.0,
+        "sigma0": -1.48,
+        "sigma1": 0.0,
+        "sigma2": 0.0,
+        "z1_log_std": -0.733,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.47,
+        "log_beta": 0.0
+      }
+    },
+    {
+      "label": "VI (structured Markov, lr=0.001)",
+      "family": "vi",
+      "method": "vi_only",
+      "encoder": "struct_markov",
+      "alpha": null,
+      "lr": 0.001,
+      "hidden_dim": 32,
+      "n_epochs_inner": null,
+      "n_iters_outer": null,
+      "n_epochs_vi_obs": 10000,
+      "source_file": "results/_simulation_ar1n_sweep/vi_struct_markov_h32_ep10000_lr1e-3_crn.json",
+      "theta_role": "theta_VI_obs (VI MAP on observed panel)",
+      "free_keys": [
+        "mu0",
+        "mu1",
+        "mu2",
+        "sigma0",
+        "sigma1",
+        "sigma2",
+        "z1_log_std",
+        "log_sigma_eps"
+      ],
+      "parameters": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0,
+        "mu1": 0.898297905921936,
+        "mu2": 0.0,
+        "sigma0": -1.4711899757385254,
+        "sigma1": 0.0,
+        "sigma2": 0.0,
+        "z1_log_std": -0.7316807508468628,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.8367044925689697,
+        "log_beta": 0.0
+      },
+      "parameters_derived": {
+        "mu_coeffs": {
+          "a0": 0.0,
+          "a1": 0.898297905921936,
+          "a2": 0.0
+        },
+        "sigma_pre_softplus_coeffs": {
+          "b0": -1.4711899757385254,
+          "b1": 0.0,
+          "b2": 0.0
+        },
+        "sigma_at_zero": 0.20673123681408828,
+        "sigma_z1": 0.3927848533734292,
+        "z1_skew": 0.0,
+        "z1_tailweight": 1.0,
+        "sigma_eps": 0.1593416734709151,
+        "beta_tailweight": 1.0,
+        "alpha0": 0.0,
+        "log_alpha1": 0.0
+      },
+      "L2_to_truth_free": 0.009796802297686568,
+      "diagnostics": {
+        "elbo_at_vi": -1.451195478439331,
+        "iwae_at_vi": -1.4471088647842407,
+        "elbo_at_ivi": null,
+        "iwae_at_ivi": null,
+        "elbo_at_truth": -1.4640523195266724,
+        "iwae_at_truth": -1.4472401142120361,
+        "smc_log_p_at_truth": -1.4561712741851807
+      },
+      "truth_tagged_in_source": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0,
+        "mu1": 0.9,
+        "mu2": 0.0,
+        "sigma0": -1.48,
+        "sigma1": 0.0,
+        "sigma2": 0.0,
+        "z1_log_std": -0.733,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.833,
+        "log_beta": 0.0
+      }
+    },
+    {
+      "label": "VI (transformed joint-normal, lr=0.001)",
+      "family": "vi",
+      "method": "vi_only",
+      "encoder": "tjn",
+      "alpha": null,
+      "lr": 0.001,
+      "hidden_dim": 32,
+      "n_epochs_inner": null,
+      "n_iters_outer": null,
+      "n_epochs_vi_obs": 10000,
+      "source_file": "results/_simulation_ar1n_sweep/vi_tjn_h32_ep10000_lr1e-3_crn.json",
+      "theta_role": "theta_VI_obs (VI MAP on observed panel)",
+      "free_keys": [
+        "mu0",
+        "mu1",
+        "mu2",
+        "sigma0",
+        "sigma1",
+        "sigma2",
+        "z1_log_std",
+        "log_sigma_eps"
+      ],
+      "parameters": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0,
+        "mu1": 0.8977394700050354,
+        "mu2": 0.0,
+        "sigma0": -1.4683648347854614,
+        "sigma1": 0.0,
+        "sigma2": 0.0,
+        "z1_log_std": -0.7308995127677917,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.840571641921997,
+        "log_beta": 0.0
+      },
+      "parameters_derived": {
+        "mu_coeffs": {
+          "a0": 0.0,
+          "a1": 0.8977394700050354,
+          "a2": 0.0
+        },
+        "sigma_pre_softplus_coeffs": {
+          "b0": -1.4683648347854614,
+          "b1": 0.0,
+          "b2": 0.0
+        },
+        "sigma_at_zero": 0.2072594717286084,
+        "sigma_z1": 0.39303868675228854,
+        "z1_skew": 0.0,
+        "z1_tailweight": 1.0,
+        "sigma_eps": 0.15872666535201202,
+        "beta_tailweight": 1.0,
+        "alpha0": 0.0,
+        "log_alpha1": 0.0
+      },
+      "L2_to_truth_free": 0.014220719863472337,
+      "diagnostics": {
+        "elbo_at_vi": -1.473466396331787,
+        "iwae_at_vi": -1.4472649097442627,
+        "elbo_at_ivi": null,
+        "iwae_at_ivi": null,
+        "elbo_at_truth": -1.4640523195266724,
+        "iwae_at_truth": -1.4472401142120361,
+        "smc_log_p_at_truth": -1.4561712741851807
+      },
+      "truth_tagged_in_source": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0,
+        "mu1": 0.9,
+        "mu2": 0.0,
+        "sigma0": -1.48,
+        "sigma1": 0.0,
+        "sigma2": 0.0,
+        "z1_log_std": -0.733,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.833,
+        "log_beta": 0.0
+      }
+    },
+    {
+      "label": "VI (tridiag joint-normal, lr=0.01)",
+      "family": "vi",
+      "method": "vi_only",
+      "encoder": "tridiag",
+      "alpha": null,
+      "lr": 0.01,
+      "hidden_dim": 32,
+      "n_epochs_inner": null,
+      "n_iters_outer": null,
+      "n_epochs_vi_obs": 10000,
+      "source_file": "results/_simulation_ar1n_sweep/vi_tridiag_h32_ep10000_lr1e-2_crn.json",
+      "theta_role": "theta_VI_obs (VI MAP on observed panel)",
+      "free_keys": [
+        "mu0",
+        "mu1",
+        "mu2",
+        "sigma0",
+        "sigma1",
+        "sigma2",
+        "z1_log_std",
+        "log_sigma_eps"
+      ],
+      "parameters": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.001123150927014649,
+        "mu1": 0.8955181837081909,
+        "mu2": -0.004144215025007725,
+        "sigma0": -1.4567022323608398,
+        "sigma1": 0.014688754454255104,
+        "sigma2": 0.001061281654983759,
+        "z1_log_std": -0.7283704876899719,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.4785292148590088,
+        "log_beta": 0.0
+      },
+      "parameters_derived": {
+        "mu_coeffs": {
+          "a0": 0.001123150927014649,
+          "a1": 0.8955181837081909,
+          "a2": -0.004144215025007725
+        },
+        "sigma_pre_softplus_coeffs": {
+          "b0": -1.4567022323608398,
+          "b1": 0.014688754454255104,
+          "b2": 0.001061281654983759
+        },
+        "sigma_at_zero": 0.209452981848124,
+        "sigma_z1": 0.39386131500424726,
+        "z1_skew": 0.0,
+        "z1_tailweight": 1.0,
+        "sigma_eps": 0.22797274084811117,
+        "beta_tailweight": 1.0,
+        "alpha0": 0.0,
+        "log_alpha1": 0.0
+      },
+      "L2_to_truth_free": 0.029872635587249726,
+      "diagnostics": {
+        "elbo_at_vi": -2.4707717895507812,
+        "iwae_at_vi": -2.4577672481536865,
+        "elbo_at_truth": -2.4735043048858643,
+        "iwae_at_truth": -2.4581902027130127,
+        "smc_log_p_at_truth": -2.46506667137146
+      },
+      "truth_tagged_in_source": {
+        "alpha0": 0.0,
+        "log_alpha1": 0.0,
+        "mu0": 0.0,
+        "mu1": 0.9,
+        "mu2": 0.0,
+        "sigma0": -1.48,
+        "sigma1": 0.0,
+        "sigma2": 0.0,
+        "z1_log_std": -0.733,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.0,
+        "log_sigma_eps": -1.47,
+        "log_beta": 0.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+# Project-local scripthut config for the replication package.
+#
+# Loaded server-side whenever a workflow from this repo runs. Only the
+# project-level sections (stacks / workflows / env / env_groups) are accepted
+# here; backends, sources and auth live in ~/.config/scripthut/scripthut.yaml.
+#
+# Stack `mlye-replication`: a venv with the exact package versions of uv.lock
+# (the list below is `requirements.lock` without environment markers;
+# tests/test_replication.py checks the two stay in sync).
+#
+# Tasks opt in with:  "env": [{"stacks": ["mlye-replication"]}]
+# Install once:       scripthut stack install mlye-replication --backend pythia-nb
+#
+# Set MLYE_STACK_ROOT externally to an absolute directory on shared storage
+# visible from every backend using this stack. Export it in the remote SSH
+# environment so both stack installation and task jobs inherit it.
+# The venv lives at $MLYE_STACK_ROOT/mlye-replication/venv.
+# Use the system /usr/bin/python3.12. `inputs:` is hashed into the cache key,
+# so editing the pins triggers a fresh prep.
+stacks:
+  - name: mlye-replication
+    backends: [mercury-nb, pythia-nb]
+    partition: standard
+    cpus: 2
+    memory: 16G
+    time_limit: "2:00:00"
+    inputs:
+      lock: "annotated-types==0.8.0 contourpy==1.3.3 cuda-bindings==13.3.1 cuda-pathfinder==1.7.0 cuda-toolkit==13.0.3.0 cycler==0.12.1 filelock==3.32.4 fonttools==4.63.0 fsspec==2026.7.0 jinja2==3.1.6 kiwisolver==1.5.0 markupsafe==3.0.3 matplotlib==3.11.1 mpmath==1.3.0 networkx==3.6.1 numpy==2.5.2 nvidia-cublas==13.1.1.3 nvidia-cuda-cupti==13.0.85 nvidia-cuda-nvrtc==13.0.88 nvidia-cuda-runtime==13.0.96 nvidia-cudnn-cu13==9.20.0.48 nvidia-cufft==12.0.0.61 nvidia-cufile==1.15.1.6 nvidia-curand==10.4.0.35 nvidia-cusolver==12.0.4.66 nvidia-cusparse==12.6.3.3 nvidia-cusparselt-cu13==0.8.1 nvidia-ml-py==13.615.71 nvidia-nccl-cu13==2.29.7 nvidia-nvjitlink==13.3.33 nvidia-nvshmem-cu13==3.4.5 nvidia-nvtx==13.0.85 packaging==26.3 pandas==3.0.5 patsy==1.0.2 pillow==12.3.0 pydantic==2.13.4 pydantic-core==2.46.4 pyparsing==3.3.2 python-dateutil==2.9.0.post0 scipy==1.18.1 setuptools==84.0.0 six==1.17.0 statsmodels==0.14.6 structlog==26.1.0 sympy==1.14.0 torch==2.13.0 triton==3.7.1 typing-extensions==4.16.0 typing-inspection==0.4.4 tzdata==2026.3"
+      layout: "replication-v3-external-stack-root"
+    prep: |
+      set -euo pipefail
+      VENV="${MLYE_STACK_ROOT:?Set MLYE_STACK_ROOT to an absolute shared-storage directory}/mlye-replication/venv"
+      mkdir -p "$(dirname "$VENV")"
+      rm -rf "$VENV"
+      /usr/bin/python3.12 -m venv "$VENV"
+      "$VENV/bin/pip" install --no-cache-dir --upgrade pip
+      "$VENV/bin/pip" install --no-cache-dir \
+        annotated-types==0.8.0 \
+        contourpy==1.3.3 \
+        cuda-bindings==13.3.1 \
+        cuda-pathfinder==1.7.0 \
+        cuda-toolkit==13.0.3.0 \
+        cycler==0.12.1 \
+        filelock==3.32.4 \
+        fonttools==4.63.0 \
+        fsspec==2026.7.0 \
+        jinja2==3.1.6 \
+        kiwisolver==1.5.0 \
+        markupsafe==3.0.3 \
+        matplotlib==3.11.1 \
+        mpmath==1.3.0 \
+        networkx==3.6.1 \
+        numpy==2.5.2 \
+        nvidia-cublas==13.1.1.3 \
+        nvidia-cuda-cupti==13.0.85 \
+        nvidia-cuda-nvrtc==13.0.88 \
+        nvidia-cuda-runtime==13.0.96 \
+        nvidia-cudnn-cu13==9.20.0.48 \
+        nvidia-cufft==12.0.0.61 \
+        nvidia-cufile==1.15.1.6 \
+        nvidia-curand==10.4.0.35 \
+        nvidia-cusolver==12.0.4.66 \
+        nvidia-cusparse==12.6.3.3 \
+        nvidia-cusparselt-cu13==0.8.1 \
+        nvidia-ml-py==13.615.71 \
+        nvidia-nccl-cu13==2.29.7 \
+        nvidia-nvjitlink==13.3.33 \
+        nvidia-nvshmem-cu13==3.4.5 \
+        nvidia-nvtx==13.0.85 \
+        packaging==26.3 \
+        pandas==3.0.5 \
+        patsy==1.0.2 \
+        pillow==12.3.0 \
+        pydantic==2.13.4 \
+        pydantic-core==2.46.4 \
+        pyparsing==3.3.2 \
+        python-dateutil==2.9.0.post0 \
+        scipy==1.18.1 \
+        setuptools==84.0.0 \
+        six==1.17.0 \
+        statsmodels==0.14.6 \
+        structlog==26.1.0 \
+        sympy==1.14.0 \
+        torch==2.13.0 \
+        triton==3.7.1 \
+        typing-extensions==4.16.0 \
+        typing-inspection==0.4.4 \
+        tzdata==2026.3
+    init: |
+      export PATH="${MLYE_STACK_ROOT:?Set MLYE_STACK_ROOT to an absolute shared-storage directory}/mlye-replication/venv/bin:$PATH"

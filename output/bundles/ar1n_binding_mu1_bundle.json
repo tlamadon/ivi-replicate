@@ -1,0 +1,154 @@
+{
+  "metadata": {
+    "title": "simulation-ar1n: Layer 1d mu_1 binding-function post-step (bundle)",
+    "dgp_spec": "specs/compute-simulation-ar1n.md",
+    "source_file": "results/_simulation_ar1n_binding_mu1/binding_mu1.json",
+    "upstream_sweep_file": "results/_simulation_ar1n_sweep/picard_meanfield_alpha0.60_ep8000_lr1e-2_crn.json",
+    "panel": {
+      "N": 30000,
+      "T": 6,
+      "obs_seed": 11
+    },
+    "grid": {
+      "n_grid": 15,
+      "grid_min": 0.55,
+      "grid_max": 1.25
+    },
+    "vi_fit": {
+      "encoder": "mean-field (normal_diagonal)",
+      "hidden_dim": 32,
+      "n_epochs_vi": 8000,
+      "lr": 0.01,
+      "fix_noise": true,
+      "noise_seed": 12345
+    },
+    "produced_by": "experiments/_export_ar1n_binding_mu1_bundle.py"
+  },
+  "ai_prompt": "This JSON bundles the 1D $\\mu_1$ binding-function post-step for the\nsimulation-ar1n model class (Model A: well-specified AR(1)+Normal\nprior + Gaussian decoder; 8 free coordinates, 5 pinned). The slice is\n1D in $\\mu_1$ --- the AR(1) coefficient --- with the other seven\nfree coordinates $(\\mu_0, \\mu_2, \\sigma_0, \\sigma_1, \\sigma_2,\n\\texttt{z1\\_log\\_std}, \\log\\sigma_\\varepsilon)$ initialised at\nthe DGP truth (which lies on the AR(1) slice $\\mu_0 = \\mu_2 =\n\\sigma_1 = \\sigma_2 = 0$ and at specific values for $\\sigma_0$ and\n$\\texttt{z1\\_log\\_std}$ --- see the sibling Layer 1a-summary bundle\nat `results/_simulation_ar1n_sweep/ar1n_parameter_summary.json` for\nthe numerical values), and the four shape coordinates $(\\log\\beta,\n\\theta_{\\rm MA}, z_1\\,\\text{skew}, z_1\\,\\log\\,\\text{tail})$\npinned at 0 (Model A defaults; $\\alpha_0$ and $\\log\\alpha_1$ are\nnot registered under the poly law model).\n\nGrid orientation. `mu1_grid` (length `config.n_grid`) is a 1D array\ncovering $[\\texttt{config.grid\\_min}, \\texttt{config.grid\\_max}]$.\nAt each grid cell $i$ the source records one binding-function value\nevaluated at $\\theta_0$ (the 8-coord vector with the slice coord set\nto $\\mu_1^{(0)} = \\texttt{mu1\\_grid}[i]$ and the other seven\ninitialised at truth):\n\n  `b_mu1[i]` --- the mean-field $h=32$ binding map with ALL EIGHT free\n                 parameters trainable jointly (the same parameter set\n                 the upstream Layer 1a mean-field VI fit trains; the\n                 four shape coordinates above remain pinned at zero).\n                 $\\theta_0$ is used to simulate\n                 $y_{\\rm sim}(\\theta_0)$ via strong CRN (z_noise,\n                 y_noise drawn once at `obs_seed` and reused at every\n                 cell), then the mean-field VI is fit on $y_{\\rm sim}$\n                 for `n_epochs_vi` epochs at `lr` with AdamW. The\n                 converged $\\hat\\mu_1$ is read off as the binding-map\n                 output; the other seven converged components are NOT\n                 recorded here.\n\nFixed-point reference. `b_mu1_star` is the same all-eight-free-params\nmean-field VI fit applied to $y_{\\rm obs}$ directly (rather than to a\nsimulated $y_{\\rm sim}$). Under strong CRN on a well-specified DGP\nit equals $b_{\\mu_1}(\\mu_1^{(0)})$ at $\\mu_1^{(0)} = \\mu_1^{\\rm\ntruth}$, AND it equals $\\mu_1^{\\rm VI}$ (the upstream Layer 1a VI\nestimate on $y_{\\rm obs}$) by construction --- the binding function\npasses through the upstream VI estimate when evaluated at the truth.\n\nPicard fixed-point picture. The displacement array\n$\\Delta(\\mu_1^{(0)}) = b_{\\mu_1}(\\mu_1^{(0)}) - \\mu_1^{(0)}$ is\npre-computed in this bundle as `b_mu1_minus_identity` --- handy for\none-shot plotting (zero crossings = Picard fixed points) without\nre-broadcasting `mu1_grid` against the source array. Two distinct\niterations consume this field:\n\n  - Standard Picard $\\mu_1^{(k+1)} = b(\\mu_1^{(k)})$: fixed point at\n    $\\Delta(\\mu_1^{(0)}) = 0$, i.e. wherever $b(\\mu_1^{(0)}) =\n    \\mu_1^{(0)}$. Generally NOT at $\\mu_1^{\\rm truth}$ on this DGP\n    --- mean-field VI is biased downward (`vi_mu1` $\\approx 0.755 <\n    \\mu_1^{\\rm truth} = 0.9$), so the standard-Picard attractor\n    sits below truth at the binding's identity crossing.\n  - Binding-equation Picard $\\mu_1^{(k+1)} = \\mu_1^{(k)} +\n    (\\theta_{\\rm VI}^{\\rm obs} - b(\\mu_1^{(k)}))$: fixed point at\n    $b(\\mu_1^{(0)}) = b^\\star = \\theta_{\\rm VI}^{\\rm obs}$. Under\n    strong CRN on a well-specified DGP this lands at $\\mu_1^{(0)} =\n    \\mu_1^{\\rm truth}$. This is the IVI iteration whose converged\n    value is exposed as the `ivi` reference point.\n\nReference points (`reference_points`):\n\n  - `truth` --- the DGP truth $\\mu_1^{\\rm truth} = 0.9$. Under\n    strong CRN at $\\mu_1^{(0)} = \\mu_1^{\\rm truth}$ the binding\n    map satisfies $b_{\\mu_1}(\\mu_1^{\\rm truth}) = b^\\star =\n    \\mu_1^{\\rm VI}$, so truth is the binding-equation Picard fixed\n    point on this DGP (the AR(1)+Normal model class is\n    well-specified).\n  - `vi_obs` --- the mean-field VI fit on $y_{\\rm obs}$ (the upstream\n    Layer 1a `picard_meanfield` configuration's starting point,\n    equivalently the IVI iteration's $\\mu_1$ at outer step $k=0$).\n  - `ivi` --- the mean-field damped-Picard IVI's converged $\\hat\n    \\mu_1$ (the upstream Layer 1a `picard_meanfield` configuration's\n    final $\\theta_K$). Should be close to `truth` under strong CRN.\n  - `bstar` --- the all-eight-free-params mean-field VI fit applied to\n    $y_{\\rm obs}$ directly. Equals $b_{\\mu_1}(\\mu_1^{\\rm truth})$\n    on the binding curve and equals $\\mu_1^{\\rm VI}$ by construction\n    under strong CRN.\n\nEach reference point carries the 1-key slice coord dict `parameters`\n(`mu1`) and a `parameters_derived` block. On the AR(1) slice the\ngenerative drift is exactly $\\mu(z) = \\mu_1 \\cdot z$ (since $\\mu_0\n= \\mu_2 = 0$ at truth), so the derived block reports\n`mu_z_linear_coef = mu1` directly --- no softplus/exp needed for the\n1D slice.\n\nParameter mapping. The full 13-coordinate Model A parameter dict\nmaps to the generative model as\n\n  mu(z)         = mu0 + mu1 * z + mu2 * z^2\n  sigma(z)      = softplus(sigma0 + sigma1 * z + sigma2 * z^2)\n  sigma_z1      = softplus(z1_log_std)\n  sigma_eps     = exp(log_sigma_eps)\n  z_1 ~ Normal(0, sigma_z1**2)\n  eps_t ~ Normal(0, sigma_eps**2)\n  z_t | z_{t-1} ~ Normal(mu(z_{t-1}), sigma(z_{t-1})**2)\n  y_t = z_t + eps_t\n\nThe 1D slice plotted here exposes only `mu1`; see\n`parameter_schema.initialised_at_truth` /\n`parameter_schema.pinned_at_zero` for the other 12 coordinates' values\nalong this slice. The full 13-key vector and the relationships\nbetween coordinates are documented in the sibling Layer 1a-summary\nbundle at\n`results/_simulation_ar1n_sweep/ar1n_parameter_summary.json`.\n",
+  "parameter_schema": {
+    "slice_param_names": [
+      "mu1"
+    ],
+    "initialised_at_truth": [
+      "mu0",
+      "mu2",
+      "sigma0",
+      "sigma1",
+      "sigma2",
+      "z1_log_std",
+      "log_sigma_eps"
+    ],
+    "pinned_at_zero": {
+      "log_beta": 0.0,
+      "theta_MA": 0.0,
+      "z1_skew": 0.0,
+      "z1_log_tail": 0.0
+    },
+    "truth_values_reference": "results/_simulation_ar1n_sweep/ar1n_parameter_summary.json (reference_points.truth.parameters)",
+    "description": "Layer 1d plots the 1D mu1 slice of the Model A parameter vector. At each grid cell, a mean-field h=32 VI is fit on y_sim(theta_0) with ALL EIGHT free parameters trainable (mu0, mu1, mu2, sigma0, sigma1, sigma2, z1_log_std, log_sigma_eps) --- the same parameter set as the upstream Layer 1a VI fit. The four shape parameters (log_beta, theta_MA, z1_skew, z1_log_tail) remain pinned at zero. The non-slice free parameters are initialised at truth at every cell; mu1 is initialised at mu1^(0). The fixed-point reference `b_mu1_star` is the same all-eight-free-params fit applied directly to y_obs --- under strong CRN it equals b_mu1 evaluated at truth, AND it equals mu1^VI by construction (the binding function passes through the upstream VI estimate when evaluated at the truth)."
+  },
+  "reference_points": {
+    "truth": {
+      "name": "truth",
+      "parameters": {
+        "mu1": 0.9
+      },
+      "parameters_derived": {
+        "mu_z_linear_coef": 0.9
+      }
+    },
+    "vi_obs": {
+      "name": "vi_obs",
+      "parameters": {
+        "mu1": 0.7555468082427979
+      },
+      "parameters_derived": {
+        "mu_z_linear_coef": 0.7555468082427979
+      }
+    },
+    "ivi": {
+      "name": "ivi",
+      "parameters": {
+        "mu1": 0.9002766251564027
+      },
+      "parameters_derived": {
+        "mu_z_linear_coef": 0.9002766251564027
+      }
+    },
+    "bstar": {
+      "name": "bstar",
+      "parameters": {
+        "mu1": 0.7557213306427002
+      },
+      "parameters_derived": {
+        "mu_z_linear_coef": 0.7557213306427002
+      }
+    }
+  },
+  "mu1_grid": [
+    0.55,
+    0.6000000000000001,
+    0.65,
+    0.7000000000000001,
+    0.75,
+    0.8,
+    0.8500000000000001,
+    0.9,
+    0.95,
+    1.0,
+    1.05,
+    1.1,
+    1.15,
+    1.2,
+    1.25
+  ],
+  "b_mu1": [
+    0.3736295700073242,
+    0.4203275740146637,
+    0.4669641852378845,
+    0.5187948942184448,
+    0.5736395120620728,
+    0.6324478387832642,
+    0.6933422088623047,
+    0.7557213306427002,
+    0.8201918601989746,
+    0.8845683336257935,
+    0.9478685855865479,
+    1.0120102167129517,
+    1.0738033056259155,
+    1.1343274116516113,
+    1.1932413578033447
+  ],
+  "b_mu1_minus_identity": [
+    -0.17637042999267583,
+    -0.1796724259853364,
+    -0.1830358147621155,
+    -0.18120510578155524,
+    -0.17636048793792725,
+    -0.16755216121673588,
+    -0.1566577911376954,
+    -0.14427866935729983,
+    -0.12980813980102535,
+    -0.11543166637420654,
+    -0.10213141441345219,
+    -0.08798978328704843,
+    -0.07619669437408438,
+    -0.06567258834838863,
+    -0.05675864219665527
+  ],
+  "config": {
+    "dgp": "simulation-ar1n",
+    "n_grid": 15,
+    "n_epochs_vi": 8000,
+    "lr": 0.01,
+    "fix_noise": true,
+    "noise_seed": 12345,
+    "grid_min": 0.55,
+    "grid_max": 1.25,
+    "hidden_dim": 32,
+    "N": 30000,
+    "T": 6,
+    "obs_seed": 11,
+    "upstream": "results/_simulation_ar1n_sweep/picard_meanfield_alpha0.60_ep8000_lr1e-2_crn.json"
+  }
+}

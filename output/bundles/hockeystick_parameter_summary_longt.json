@@ -1,0 +1,309 @@
+{
+  "metadata": {
+    "title": "simulation-hockeystick: fitted parameter export",
+    "dgp_spec": "specs/compute-simulation-hockeystick.md",
+    "models_spec": "specs/models.md",
+    "source_dir": "results/_simulation_hockeystick_t40_ivi_sweep",
+    "panel": {
+      "N": 30000,
+      "T": 40,
+      "obs_seed": 11,
+      "sigma0_calibration": -1.8
+    },
+    "produced_by": "experiments/_export_hockeystick_parameter_summary.py",
+    "n_fits": 2,
+    "n_shipping": 2
+  },
+  "ai_prompt": "This JSON catalogues the fitted parameter vector for every cell in the\nsimulation-hockeystick sweep (a 1-D latent state-space model with a\nsoftplus-kinked drift, sinh-arcsinh initial state, and sinh-arcsinh\nmeasurement error). Each entry in `fits` reports a 13-element\nparameter dict in the canonical ordering listed under\n`parameter_schema.param_names`. The mapping from those parameters to\nthe generative model is:\n\n(1) Law of motion (transition density), softplus-kinked poly-2:\n    z_t | z_{t-1} ~ Normal( mu(z_{t-1}), sigma(z_{t-1})^2 ),\n    with\n        b       = alpha0,\n        gamma   = exp(log_alpha1),\n        mu(z)   = b + gamma * softplus( (poly_mu(z) - b) / gamma ),\n        poly_mu(z) = mu0 + mu1 * z + mu2 * z^2,\n        sigma(z)   = softplus(sigma0 + sigma1 * z + sigma2 * z^2),\n    where softplus(x) = log(1 + exp(x)). As gamma -> +inf the kink\n    vanishes and mu(z) -> poly_mu(z); at finite gamma, mu(z) is bounded\n    below by b (the kink floor). NB: sigma uses softplus, NOT exp.\n\n(2) Initial-state density (sinh-arcsinh):\n    z_1 ~ SinhArcsinh( loc=0, scale=softplus(z1_log_std),\n                       skew=z1_skew, tailweight=exp(z1_log_tail) ).\n    The scalar SinhArcsinh density is\n        z = loc + scale * sinh( tailweight * ( asinh(eps) + skew ) ),\n        eps ~ Normal(0, 1).\n    For this DGP, z1_skew is pinned at 0 (symmetric), z1_log_tail\n    is *free*, and the truth has scale = 0.34 and tailweight = 1/0.89.\n    NB: scale uses softplus on z1_log_std; tailweight uses exp on\n    z1_log_tail. The 'log_std' suffix is historical and misleading ---\n    it is pre-softplus, not pre-exp.\n\n(3) Measurement-error density (sinh-arcsinh):\n    y_t = z_t + eps_t,\n    eps_t ~ SinhArcsinh( loc=0,\n                         scale=exp(log_sigma_eps),\n                         skew=0,\n                         tailweight=exp(log_beta) ).\n    Sigma uses exp (no softplus, no floor under this calibration).\n    The truth has scale = 0.033 and tailweight = 1/0.47 ~ 2.13 --- the\n    decoder is heavy-tailed, NOT Gaussian. The MA(1) coefficient theta\n    is pinned at 0 for every cell in this sweep, so the residual is\n    IID-in-t SinhArcsinh.\n\n(4) z1_skew:\n    Pinned at 0 (`requires_grad=False`) for every cell in this sweep,\n    per the 2026-06-15 schema convention (the DGP truth is symmetric).\n    Pre-2026-06-15 JSONs that trained z1_skew freely are not present\n    in this sweep.\n\nThe 12 free coordinates under the IVI cell and VI-only cells are\n    {alpha0, log_alpha1, mu0, mu1, mu2, sigma0, sigma1, sigma2,\n     z1_log_std, z1_log_tail, log_sigma_eps, log_beta}.\nThe misspecification baseline cell (`mle_direct`) drops log_sigma_eps\nand log_beta entirely (decoder does not exist; y_t = z_t exactly),\nleaving the 10 free prior + z_1 coordinates.\n\nEach entry in `fits` reports:\n  - method:           'picard_cold' | 'anderson' | 'vi_only' | 'mle_direct'\n  - encoder:          variational family for VI / IVI cells (None for MLE).\n  - emission:         'sinh' for IVI/VI cells, 'degenerate' for MLE.\n  - shipping:         True for the five canonical cells in the Entry\n                       section; False for historical / dropped cells.\n  - parameters:       raw 13-element dict in canonical order.\n  - parameters_derived: human-friendly transforms (kink params,\n                        sigma_at_zero, sigma_z1, sigma_eps, beta,\n                        z1_tailweight).\n  - L2_to_truth_free: Euclidean distance on the free coordinates.\n  - diagnostics:      ELBO / IWAE / SMC bounds; prior_log_p_* for MLE.\n\nThe `truth` block at top level gives the same in raw + derived form\nfor the DGP; see the `metadata.panel` block for this bundle's panel\nsize (N, T, obs_seed) and sigma_0 calibration (the canonical bundle is\nT=6; the IVI joint-normal variant is T=40, same truth otherwise).\n",
+  "parameter_schema": {
+    "param_names": [
+      "alpha0",
+      "log_alpha1",
+      "mu0",
+      "mu1",
+      "mu2",
+      "sigma0",
+      "sigma1",
+      "sigma2",
+      "z1_log_std",
+      "z1_skew",
+      "z1_log_tail",
+      "log_sigma_eps",
+      "log_beta"
+    ],
+    "free_keys_ivi_and_vi": [
+      "alpha0",
+      "log_alpha1",
+      "mu0",
+      "mu1",
+      "mu2",
+      "sigma0",
+      "sigma1",
+      "sigma2",
+      "z1_log_std",
+      "z1_log_tail",
+      "log_sigma_eps",
+      "log_beta"
+    ],
+    "free_keys_mle_direct": [
+      "alpha0",
+      "log_alpha1",
+      "mu0",
+      "mu1",
+      "mu2",
+      "sigma0",
+      "sigma1",
+      "sigma2",
+      "z1_log_std",
+      "z1_log_tail"
+    ],
+    "softplus_params": [
+      "sigma0",
+      "sigma1",
+      "sigma2",
+      "z1_log_std"
+    ],
+    "exp_params": [
+      "log_alpha1",
+      "log_sigma_eps",
+      "log_beta",
+      "z1_log_tail"
+    ],
+    "pinned_params": {
+      "z1_skew": 0.0,
+      "theta_MA": 0.0
+    },
+    "description": "Parameter names use mixed conventions for historical reasons: prior std uses softplus (sigma(z), z1 scale), while all tailweights + the kink scale + the emission scale use exp. See the ai_prompt field for the full mapping; the softplus-kinked drift mu(z) is the hockey-stick distinguishing feature."
+  },
+  "truth": {
+    "parameters": {
+      "alpha0": -0.25,
+      "log_alpha1": -2.3026,
+      "mu0": 0.0,
+      "mu1": 0.9,
+      "mu2": 0.0,
+      "sigma0": -1.8,
+      "sigma1": 0.0,
+      "sigma2": 0.35,
+      "z1_log_std": -0.904,
+      "z1_skew": 0.0,
+      "z1_log_tail": 0.1165,
+      "log_sigma_eps": -3.4112,
+      "log_beta": 0.755
+    },
+    "parameters_derived": {
+      "kink_bias_b": -0.25,
+      "kink_log_gamma": -2.3026,
+      "kink_gamma": 0.09999850931051546,
+      "mu_poly_coeffs": {
+        "a0": 0.0,
+        "a1": 0.9,
+        "a2": 0.0
+      },
+      "sigma_pre_softplus_coeffs": {
+        "b0": -1.8,
+        "b1": 0.0,
+        "b2": 0.35
+      },
+      "sigma_at_zero": 0.15297761052607411,
+      "mu_at_zero": 0.007888573131547616,
+      "sigma_z1": 0.3399993158197329,
+      "z1_skew": 0.0,
+      "z1_tailweight": 1.123557510467204,
+      "sigma_eps": 0.03300157471558714,
+      "beta_tailweight": 2.127611523355298
+    }
+  },
+  "fits": [
+    {
+      "label": "IVI Picard cold alpha=0.6 (joint-normal)",
+      "family": "ivi",
+      "shipping": true,
+      "method": "picard_cold",
+      "encoder": "jn",
+      "emission": "sinh",
+      "alpha": 0.6,
+      "m_mem": null,
+      "lr": 0.01,
+      "hidden_dim": null,
+      "n_epochs_inner": 16000,
+      "n_iters_outer": 50,
+      "n_epochs_vi_obs": 20000,
+      "n_epochs_mle": null,
+      "source_file": "results/_simulation_hockeystick_t40_ivi_sweep/picard_cold_alpha0.60_ep16000_lr1e-2_crn_sig0--1.80_T40.json",
+      "theta_role": "final_theta (IVI binding-equation fixed point after N_ITERS_OUTER outer iters)",
+      "free_keys": [
+        "alpha0",
+        "log_alpha1",
+        "mu0",
+        "mu1",
+        "mu2",
+        "sigma0",
+        "sigma1",
+        "sigma2",
+        "z1_log_std",
+        "z1_log_tail",
+        "log_sigma_eps",
+        "log_beta"
+      ],
+      "parameters": {
+        "alpha0": -0.23784415125846864,
+        "log_alpha1": -2.371923327445985,
+        "mu0": 0.0018984352180268622,
+        "mu1": 0.8966901063919068,
+        "mu2": 0.004403635486960408,
+        "sigma0": -1.8056379079818723,
+        "sigma1": -0.010349522531032555,
+        "sigma2": 0.35848149210214614,
+        "z1_log_std": -0.9748541474342344,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.15283991098403926,
+        "log_sigma_eps": -3.4151120662689185,
+        "log_beta": 0.7538802912225946
+      },
+      "parameters_derived": {
+        "kink_bias_b": -0.23784415125846864,
+        "kink_log_gamma": -2.371923327445985,
+        "kink_gamma": 0.093301105022154,
+        "mu_poly_coeffs": {
+          "a0": 0.0018984352180268622,
+          "a1": 0.8966901063919068,
+          "a2": 0.004403635486960408
+        },
+        "sigma_pre_softplus_coeffs": {
+          "b0": -1.8056379079818723,
+          "b1": -0.010349522531032555,
+          "b2": 0.35848149210214614
+        },
+        "sigma_at_zero": 0.15217979931690995,
+        "mu_at_zero": 0.008782143888992122,
+        "sigma_z1": 0.3200868492533537,
+        "z1_skew": 0.0,
+        "z1_tailweight": 1.1651384381455492,
+        "sigma_eps": 0.03287272257171616,
+        "beta_tailweight": 2.125230551304102
+      },
+      "L2_to_truth_free": 0.10749758846037495,
+      "diagnostics": {
+        "elbo_at_vi": -87.91278076171875,
+        "iwae_at_vi": -29.72190284729004,
+        "elbo_at_ivi": -7.449814796447754,
+        "iwae_at_ivi": -2.244488477706909,
+        "elbo_at_truth": 55000010752.0,
+        "iwae_at_truth": 164512956416.0,
+        "smc_log_p_at_truth": -0.19808410108089447,
+        "prior_log_p_at_mle": null,
+        "prior_log_p_at_truth": null
+      },
+      "truth_tagged_in_source": {
+        "alpha0": -0.25,
+        "log_alpha1": -2.3026,
+        "mu0": 0.0,
+        "mu1": 0.9,
+        "mu2": 0.0,
+        "sigma0": -1.8,
+        "sigma1": 0.0,
+        "sigma2": 0.35,
+        "z1_log_std": -0.904,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.1165,
+        "log_sigma_eps": -3.4112,
+        "log_beta": 0.755
+      }
+    },
+    {
+      "label": "VI (joint-normal)",
+      "family": "vi",
+      "shipping": true,
+      "method": "vi_only",
+      "encoder": "jn",
+      "emission": "sinh",
+      "alpha": null,
+      "m_mem": null,
+      "lr": 0.01,
+      "hidden_dim": null,
+      "n_epochs_inner": null,
+      "n_iters_outer": null,
+      "n_epochs_vi_obs": 20000,
+      "n_epochs_mle": null,
+      "source_file": "results/_simulation_hockeystick_t40_ivi_sweep/picard_cold_alpha0.60_ep16000_lr1e-2_crn_sig0--1.80_T40.json",
+      "theta_role": "theta_VI_obs (Picard IVI cell Phase 1 fit, synthesized as the VI-only joint-normal estimator per spec)",
+      "free_keys": [
+        "alpha0",
+        "log_alpha1",
+        "mu0",
+        "mu1",
+        "mu2",
+        "sigma0",
+        "sigma1",
+        "sigma2",
+        "z1_log_std",
+        "z1_log_tail",
+        "log_sigma_eps",
+        "log_beta"
+      ],
+      "parameters": {
+        "alpha0": -0.32270872592926025,
+        "log_alpha1": -1.962571382522583,
+        "mu0": 0.004911008756607771,
+        "mu1": 0.8242525458335876,
+        "mu2": 0.03916303813457489,
+        "sigma0": -1.600281834602356,
+        "sigma1": 0.06769119948148727,
+        "sigma2": 0.19951412081718445,
+        "z1_log_std": -0.8873917460441589,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.12088487297296524,
+        "log_sigma_eps": -2.1401612758636475,
+        "log_beta": 0.08098018169403076
+      },
+      "parameters_derived": {
+        "kink_bias_b": -0.32270872592926025,
+        "kink_log_gamma": -1.962571382522583,
+        "kink_gamma": 0.14049668531894904,
+        "mu_poly_coeffs": {
+          "a0": 0.004911008756607771,
+          "a1": 0.8242525458335876,
+          "a2": 0.03916303813457489
+        },
+        "sigma_pre_softplus_coeffs": {
+          "b0": -1.600281834602356,
+          "b1": 0.06769119948148727,
+          "b2": 0.19951412081718445
+        },
+        "sigma_at_zero": 0.1838534034071346,
+        "mu_at_zero": 0.017932697141538945,
+        "sigma_z1": 0.3448146597140973,
+        "z1_skew": 0.0,
+        "z1_tailweight": 1.1284949846157872,
+        "sigma_eps": 0.1176358696653719,
+        "beta_tailweight": 1.0843494063854981
+      },
+      "L2_to_truth_free": 1.5051425901720368,
+      "diagnostics": {
+        "elbo_at_vi": -87.91278076171875,
+        "iwae_at_vi": -29.72190284729004,
+        "elbo_at_ivi": null,
+        "iwae_at_ivi": null,
+        "elbo_at_truth": null,
+        "iwae_at_truth": null,
+        "smc_log_p_at_truth": -0.19808410108089447
+      },
+      "truth_tagged_in_source": {
+        "alpha0": -0.25,
+        "log_alpha1": -2.3026,
+        "mu0": 0.0,
+        "mu1": 0.9,
+        "mu2": 0.0,
+        "sigma0": -1.8,
+        "sigma1": 0.0,
+        "sigma2": 0.35,
+        "z1_log_std": -0.904,
+        "z1_skew": 0.0,
+        "z1_log_tail": 0.1165,
+        "log_sigma_eps": -3.4112,
+        "log_beta": 0.755
+      }
+    }
+  ]
+}

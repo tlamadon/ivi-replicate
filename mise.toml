@@ -1,0 +1,31 @@
+# Tooling for the replication package: `mise install` provides everything
+# beyond the Python environment (which uv builds from uv.lock).
+#
+#   uv        Python env manager (Python 3.12 + pinned packages from uv.lock)
+#   tectonic  self-contained LaTeX engine for layer 3 (figures); fetches only
+#             the packages a document uses from its pinned TeX bundle.
+#             Statically linked (musl) build, so it also runs on NixOS.
+
+[tools]
+uv = "0.12.0"
+"ubi:tectonic-typesetting/tectonic" = { version = "tectonic@0.17.0", matching = "musl" }
+
+[tasks.setup]
+description = "Create the pinned Python environment"
+run = "uv sync --frozen"
+
+[tasks.test]
+description = "Consistency checks (CPU, ~1 min)"
+run = "uv run pytest"
+
+[tasks.data]
+description = "Layer 1: PSID/BPP data matrix + sample statistics (needs the ICPSR files in ext/bpp)"
+run = "uv run python replicate.py run --layer 1"
+
+[tasks.bundles]
+description = "Layer 2: regenerate the bundles locally (GPU; use hut.* workflows on the cluster)"
+run = "uv run python replicate.py run --layer 2"
+
+[tasks.figures]
+description = "Layer 3: figures and tables from the bundles in output/bundles/"
+run = "uv run python replicate.py run --layer 3 --force"

@@ -1,0 +1,34 @@
+[project]
+name = "mlye"
+version = "1.0.0"
+description = "Replication code: variational and indirect-variational estimation of nonlinear earnings dynamics models"
+requires-python = ">=3.12"
+dependencies = [
+    "torch>=2.13.0",
+    "numpy>=2.5",
+    "scipy>=1.18",
+    "pandas>=3.0",          # PSID/BPP data build
+    "statsmodels>=0.14",    # PSID/BPP data build (residualisation)
+    "matplotlib>=3.11",     # contour experiment
+    "pydantic>=2.13",       # encoder configs
+    "structlog>=26.1",
+    "nvidia-ml-py>=12.0",   # GPU utilisation in the time-to-convergence experiment
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["mlye"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

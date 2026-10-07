@@ -1,0 +1,63 @@
+% Paper preamble, verbatim (up to \begin{document}). scripts/fig_compile.py wraps
+% every figure/table fragment in it, so previews and figures.pdf render with the
+% paper's fonts, spacing and macros (e.g. \figurenote). Keep in sync with the paper.
+\documentclass[12pt,english]{article}
+\usepackage[breaklinks,hypertexnames=false]{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\numberwithin{equation}{section}
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage[authoryear]{natbib}
+\setlength{\bibhang}{0.5in}
+
+\usepackage{caption}
+
+\usepackage[english]{babel}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{mathabx}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usetikzlibrary{arrows.meta}
+\usepackage{pgfplots}
+\usepgfplotslibrary{groupplots}
+\usepgfplotslibrary{fillbetween}
+
+\newtheorem{remark}{Remark}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage[letterpaper,margin=1in,headheight=0pt,headsep=0pt,footskip=1cm]{geometry}
+\topskip 0pt
+\usepackage{fancyhdr}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[R]{\thepage}\renewcommand{\headrulewidth}{0pt}}
+\pagestyle{plain}
+
+\newcommand{\defeq}{\vcentcolon=}
+\renewcommand{\P}{\mathcal{P}}
+
+\usepackage{ragged2e}
+
+\newcommand{\figurenote}[1]{%
+  \vspace{0.3em}%
+  \begin{minipage}{0.9\textwidth}
+    \setlength{\parindent}{0.0em}%
+    \footnotesize
+    \justifying
+    \noindent \textit{Note:} #1
+  \end{minipage}%
+}
+
+\captionsetup[table]{skip=3pt}
+
+\definecolor{clogp}{HTML}{1B3A6B}
+\definecolor{cnon}{HTML}{007373}
+\definecolor{camo}{HTML}{D4683A}
+\definecolor{cfam}{HTML}{B0B3B8}
+\definecolor{camg}{HTML}{C2AEE6}
+\definecolor{cgrid}{HTML}{E6E8EB}
