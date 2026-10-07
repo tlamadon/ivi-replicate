@@ -1,4 +1,4 @@
-# Replication package: ml-earnings
+# Replication package: Indirect Variational Inference
 
 [![arXiv](https://img.shields.io/badge/arXiv-2607.15168-b31b1b.svg)](https://arxiv.org/abs/2607.15168)
 [![Release](https://img.shields.io/github/v/release/tlamadon/ivi-replicate)](https://github.com/tlamadon/ivi-replicate/releases/latest)
