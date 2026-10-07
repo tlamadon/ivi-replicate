@@ -2,6 +2,7 @@
 
 [![arXiv](https://img.shields.io/badge/arXiv-2607.15168-b31b1b.svg)](https://arxiv.org/abs/2607.15168)
 [![Release](https://img.shields.io/github/v/release/tlamadon/ivi-replicate)](https://github.com/tlamadon/ivi-replicate/releases/latest)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tlamadon/ivi-replicate/blob/main/notebooks/table2_vi_gaussian.ipynb)
 
 This package contains the code and published results used to reproduce the
 estimates, figures and tables of *Indirect Variational Inference: Applications
@@ -59,6 +60,14 @@ The same build runs on GitHub Actions (`.github/workflows/release.yml`):
 pushing a tag `v<version>` matching `version` in `pyproject.toml` attaches
 `figures.pdf` to a GitHub release of that name.
 
+### Try one estimation in Colab
+
+[`notebooks/table2_vi_gaussian.ipynb`](notebooks/table2_vi_gaussian.ipynb)
+([open in Colab](https://colab.research.google.com/github/tlamadon/ivi-replicate/blob/main/notebooks/table2_vi_gaussian.ipynb))
+reruns one line of Table 2 on a Colab GPU: the $T=6$ unrestricted Gaussian VI
+fit, with the settings and seeds of `replicate.py`, and compares it with the
+published estimates.
+
 ### Rerun the estimations
 
 For the empirical results, obtain `data.dta`, `tax9192.dta` and `natpr.dta`
@@ -104,6 +113,7 @@ scripts/           entry points and helpers
   fig_*.py           layer 3: figure/table generators, compilation and EPS export
   fig_preamble.tex   shared LaTeX preamble
 mlye/              estimation library (encoders, decoders, priors, FullModel, SMC/FIVO)
+notebooks/         Colab notebook rerunning one Table 2 estimation
 tests/             consistency checks (DAG, imports, seeding, environment pins, figure registry)
 workflows/         generated scripthut workflows for layers 1–2
 mise.toml          tool versions and shortcut tasks
