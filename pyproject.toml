@@ -1,6 +1,6 @@
 [project]
 name = "mlye"
-version = "1.0.0"
+version = "0.1.0"
 description = "Replication code: variational and indirect-variational estimation of nonlinear earnings dynamics models"
 requires-python = ">=3.12"
 dependencies = [

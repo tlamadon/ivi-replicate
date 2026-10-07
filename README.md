@@ -50,6 +50,10 @@ This uses the included results and writes `output/figures/figures.pdf`,
 individual PDFs, LaTeX fragments and journal EPS files. It takes about two
 minutes on a laptop and needs neither a GPU nor the external data.
 
+The same build runs on GitHub Actions (`.github/workflows/release.yml`):
+pushing a tag `v<version>` matching `version` in `pyproject.toml` attaches
+`figures.pdf` to a GitHub release of that name.
+
 ### Rerun the estimations
 
 For the empirical results, obtain `data.dta`, `tax9192.dta` and `natpr.dta`
