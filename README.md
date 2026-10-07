@@ -1,9 +1,14 @@
 # Replication package: ml-earnings
 
+[![arXiv](https://img.shields.io/badge/arXiv-2607.15168-b31b1b.svg)](https://arxiv.org/abs/2607.15168)
+[![Release](https://img.shields.io/github/v/release/tlamadon/ivi-replicate)](https://github.com/tlamadon/ivi-replicate/releases/latest)
+
 This package contains the code and published results used to reproduce the
-paper's estimates, figures and tables. You can rebuild all figures and tables
-from the included results without running the estimations or obtaining the
-external data.
+estimates, figures and tables of *Indirect Variational Inference: Applications
+to Earnings Dynamics* by Neele Balke, Stephane Bonhomme and Thibaut Lamadon
+([arXiv:2607.15168](https://arxiv.org/abs/2607.15168)). You can rebuild all
+figures and tables from the included results without running the estimations
+or obtaining the external data.
 
 This README explains how to get started, how the code is organized, and what
 the pipeline produces, including measured run times. The final section covers
