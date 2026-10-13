@@ -579,6 +579,13 @@ Every file in the package, except the per-figure tables above.
 | `fig_preamble.tex` | The paper's LaTeX preamble, shared by all items |
 | `fig_parameter_names.md` | Maps parameter symbols in the tables to bundle keys |
 
+### Packaging (`scripts/`)
+
+| File | Purpose |
+|---|---|
+| `readme_pdf.sh`, `readme/pdf.lua` | Build `README.pdf` from `README.md` (pandoc, xelatex) |
+| `make_dataverse_bundle.sh` | Build the Dataverse zip from the committed tree and verify it contains no PSID data |
+
 ### Library (`mlye/`)
 
 | File | Purpose |
