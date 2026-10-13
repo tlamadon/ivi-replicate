@@ -16,7 +16,7 @@ name="ivi-replicate-${version}"
 mkdir -p dist
 rm -rf "dist/${name}" "dist/${name}.zip"
 
-git archive --format=tar --prefix="${name}/" HEAD -- . ':(exclude)CLAUDE.md' | tar -x -C dist
+git archive --format=tar --prefix="${name}/" HEAD -- . ':(exclude)CLAUDE.md' ':(exclude)submission' | tar -x -C dist
 
 # ---- verification ---------------------------------------------------------
 cd "dist/${name}"

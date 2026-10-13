@@ -1,0 +1,137 @@
+DATAVERSE DATASET METADATA (paste into the "Add Dataset" form)
+=================================================================
+
+Collection: Journal of Labor Economics (JOLE) on Harvard Dataverse
+            https://dataverse.harvard.edu/dataverse/JOLE
+            (the acceptance letter's "JOLEE" is a typo; use JOLE)
+
+Items in [BRACKETS] need your input.
+
+-----------------------------------------------------------------
+CITATION METADATA
+-----------------------------------------------------------------
+
+Title:
+Replication Data for: Indirect Variational Inference: Applications to Earnings Dynamics
+
+Author 1:
+  Name:        Balke, Neele
+  Affiliation: [AFFILIATION]
+  Identifier:  ORCID [ORCID]
+
+Author 2:
+  Name:        Bonhomme, Stéphane
+  Affiliation: [AFFILIATION]
+  Identifier:  ORCID [ORCID]
+
+Author 3:
+  Name:        Lamadon, Thibaut
+  Affiliation: [AFFILIATION]
+  Identifier:  ORCID [ORCID]
+
+Point of Contact:
+  Name:   Lamadon, Thibaut
+  Email:  [CONTACT EMAIL]
+
+Description (Text):
+Replication package for Balke, Bonhomme and Lamadon, "Indirect Variational
+Inference: Applications to Earnings Dynamics," Journal of Labor Economics.
+The paper evaluates variational inference (VI) in models of earnings dynamics
+and introduces indirect variational inference (IVI), which treats VI as an
+auxiliary model and corrects the bias induced by the variational
+approximation. The package contains the Python code (PyTorch) for all
+simulations, the estimations on PSID earnings data, and the figures and
+tables; a pinned software environment; the estimation results (JSON bundles)
+from which every figure and table can be rebuilt in about two minutes
+without data or a GPU; and a README (PDF and Markdown) following the Social
+Science Data Editors template.
+The empirical application uses the PSID household panel prepared by
+Blundell, Pistaferri and Preston (2008), ICPSR 210782 V2
+(https://doi.org/10.3886/E210782V2), which cannot be redistributed under the
+PSID Conditions of Use. It is not included; the README explains how to
+obtain it free of charge and run the full replication.
+
+Subject:
+Social Sciences
+
+Keywords:
+  variational inference
+  indirect inference
+  earnings dynamics
+  latent variable models
+  nonlinear persistence
+  Panel Study of Income Dynamics (PSID)
+  machine learning
+  Monte Carlo simulation
+
+Related Publication:
+  Citation:  Balke, Neele, Stéphane Bonhomme, and Thibaut Lamadon. [YEAR].
+             "Indirect Variational Inference: Applications to Earnings
+             Dynamics." Journal of Labor Economics [VOLUME(ISSUE): PAGES].
+  ID Type:   doi
+  ID Number: [ARTICLE DOI, once assigned by the journal]
+  URL:       [ARTICLE URL]
+  (Working paper version: arXiv:2607.15168, https://arxiv.org/abs/2607.15168)
+
+Notes (optional):
+The package contains no PSID data. Software: Python 3.12 (packages pinned in
+uv.lock), uv 0.12.0, Tectonic 0.17.0. Estimation was run on NVIDIA H100 and
+L40S GPUs (about 22 GPU-hours, plus about 210 GPU-hours for the optional
+bootstrap).
+
+Depositor:            [YOUR NAME]
+Deposit Date:         [filled automatically]
+
+Data Sources:
+  Blundell, Richard, Luigi Pistaferri, and Ian Preston. 2026. "Replication
+  Data for: Consumption Inequality and Partial Insurance." Version V2.
+  Ann Arbor, MI: Inter-university Consortium for Political and Social
+  Research [distributor]. https://doi.org/10.3886/E210782V2
+  Panel Study of Income Dynamics, public use dataset. Produced and
+  distributed by the Survey Research Center, Institute for Social Research,
+  University of Michigan, Ann Arbor, MI ([YEAR OF DOWNLOAD]).
+
+Software:
+  Name: Python    Version: 3.12
+  Name: PyTorch   Version: 2.13.0
+  Name: Tectonic  Version: 0.17.0
+
+-----------------------------------------------------------------
+SOCIAL SCIENCE AND HUMANITIES METADATA (if the form shows it)
+-----------------------------------------------------------------
+
+Unit of Analysis:     Household
+Universe:             PSID households in the Blundell-Pistaferri-Preston
+                      (2008) sample, balanced panel 1980-1989 (N = 741, T = 10)
+Time Method:          Longitudinal: panel
+Kind of Data:         Program source code; simulated data; estimation results
+Time Period Covered:  1980 to 1989
+Geographic Coverage:  United States
+
+-----------------------------------------------------------------
+TERMS
+-----------------------------------------------------------------
+
+License:  CC BY 4.0 (code also MIT; see LICENSE in the package).
+          If the form offers only CC0, choose "Custom Dataset Terms" and
+          paste: "Code: MIT License. Results and documentation: CC BY 4.0.
+          See LICENSE in the package. The package contains no PSID data."
+
+-----------------------------------------------------------------
+FILES TO UPLOAD
+-----------------------------------------------------------------
+
+Build:   scripts/make_dataverse_bundle.sh
+         -> dist/ivi-replicate-<version>.zip (verified: no PSID data)
+         -> dist/MANIFEST.txt (path, size and sha256 of every file)
+
+Upload:  Dataverse unpacks a .zip on upload into individual files, keeping
+         the folder paths. That is the usual choice: replicators can browse
+         and download single files. (To store the package as one zip
+         instead, zip it once more, "double-zip", before uploading.)
+         Check after upload that README.pdf sits at the top level.
+
+After publishing:
+  1. Copy the dataset DOI into README.md (References, [DATAVERSE-DOI-PLACEHOLDER])
+     and rebuild README.pdf (scripts/readme_pdf.sh).
+  2. Cite the dataset DOI in the paper (data citation in text and references).
