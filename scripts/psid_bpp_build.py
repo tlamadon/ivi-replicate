@@ -1,7 +1,7 @@
 """Build the BPP (Blundell-Pistaferri-Preston, AER 2008) PSID log-earnings panel.
 
 Inputs: the AER 2008 replication package (ICPSR 210782, V2.1) extracted under
-``ext/bpp/`` (override with ``--ext`` or ``$BPP_EXT``). We use only the PSID side:
+``data/raw/`` (override with ``--ext`` or ``$BPP_EXT``). We use only the PSID side:
 
 - ``data.dta``     -- pre-built household-year panel (from create1/create2)
 - ``tax9192.dta``  -- TAXSIM federal income tax for 1991--92 (PSID stopped
@@ -44,7 +44,7 @@ import statsmodels.api as sm
 
 
 REPO = Path(__file__).resolve().parent.parent
-EXT = Path(os.environ.get("BPP_EXT", REPO / "ext" / "bpp"))
+EXT = Path(os.environ.get("BPP_EXT", REPO / "data" / "raw"))
 OUT_MATRIX = Path("output") / "data" / "bpp_y_matrix.npy"
 OUT_META = Path("output") / "data" / "bpp_y_matrix.meta.json"
 
@@ -397,7 +397,7 @@ def main():
     ap.add_argument("--end-year", type=int, default=1989)
     ap.add_argument(
         "--ext", type=Path, default=EXT,
-        help="Directory holding data.dta / tax9192.dta / natpr.dta from the ICPSR 210782 package (default ext/bpp, or $BPP_EXT)",
+        help="Directory holding data.dta / tax9192.dta / natpr.dta from the ICPSR 210782 package (default data/raw, or $BPP_EXT)",
     )
     ap.add_argument(
         "--out", type=Path, default=OUT_MATRIX,

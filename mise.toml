@@ -19,7 +19,7 @@ description = "Consistency checks (CPU, ~1 min)"
 run = "uv run pytest"
 
 [tasks.data]
-description = "Layer 1: PSID/BPP data matrix + sample statistics (needs the ICPSR files in ext/bpp)"
+description = "Layer 1: PSID/BPP data matrix + sample statistics (needs the ICPSR files in data/raw)"
 run = "uv run python replicate.py run --layer 1"
 
 [tasks.bundles]

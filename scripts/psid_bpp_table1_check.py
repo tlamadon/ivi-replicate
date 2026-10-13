@@ -6,7 +6,7 @@ import pandas as pd
 sys.path.insert(0, "scripts")
 from psid_bpp_build import select_sample, merge_taxes
 import os
-EXT = os.environ.get("BPP_EXT", "ext/bpp")
+EXT = os.environ.get("BPP_EXT", "data/raw")
 
 # Load
 data = pd.read_stata(EXT + "/data.dta", convert_categoricals=False)

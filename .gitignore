@@ -45,11 +45,16 @@ reports/*.lot
 # and reports/tab_*.tex; rebuild on demand.
 reports/standalone/
 
-# Large / regenerable data artefacts. data/ is rebuilt by
-# scripts/psid_bpp_build.py from the external ICPSR extract in ext/;
-# both hold multi-GB blobs that must not enter git history.
-/data/
+# PSID-derived data must never enter git history (PSID Conditions of Use).
+# data/raw/ holds the ICPSR 210782 input files (data.dta, tax9192.dta,
+# natpr.dta); only its README is tracked. ext/ is the old input location.
+/data/*
+!/data/raw/
+/data/raw/*
+!/data/raw/README.md
 /ext/
+*.dta
+*.npy
 
 # Run logs and scratch dumps.
 /logs/

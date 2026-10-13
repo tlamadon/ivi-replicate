@@ -645,7 +645,7 @@ def task_env(t, smoke):
             # these scripts encode epoch counts in the filename
             env.setdefault("OUT_NAME", os.path.basename(t.outputs[0]))
     if any(p.startswith("$BPP_EXT/") for p in t.inputs) and "BPP_EXT" not in env:
-        local = os.path.join(REPO, "ext", "bpp")
+        local = os.path.join(REPO, "data", "raw")
         env["BPP_EXT"] = local if os.path.isdir(local) else os.path.expanduser("~/data/bpp_ext")
     return env
 
@@ -667,9 +667,10 @@ def prepare_workdir(workdir, with_bootstrap=False):
     everything); the ICPSR inputs and the data matrix are linked.
     """
     os.makedirs(workdir, exist_ok=True)
-    ext = os.path.join(workdir, "ext")
-    if os.path.isdir(os.path.join(REPO, "ext")) and not os.path.lexists(ext):
-        os.symlink(os.path.join(REPO, "ext"), ext)
+    raw = os.path.join(workdir, "data", "raw")
+    if os.path.isdir(os.path.join(REPO, "data", "raw")) and not os.path.lexists(raw):
+        os.makedirs(os.path.dirname(raw), exist_ok=True)
+        os.symlink(os.path.join(REPO, "data", "raw"), raw)
     for name in ("bpp_y_matrix.npy", "bpp_y_matrix.meta.json"):
         src, dst = os.path.join(REPO, DATA_DIR, name), os.path.join(workdir, DATA_DIR, name)
         if os.path.exists(src) and not os.path.lexists(dst):

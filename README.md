@@ -72,7 +72,7 @@ published estimates.
 
 For the empirical results, obtain `data.dta`, `tax9192.dta` and `natpr.dta`
 from the Blundell, Pistaferri and Preston (2008) replication package, ICPSR
-study 210782. Put them in `ext/bpp/`, or set `BPP_EXT` to their directory.
+study 210782. Put them in `data/raw/`, or set `BPP_EXT` to their directory.
 See [data provenance and checksums](#data-provenance-and-checksums) for details.
 Estimation needs an NVIDIA GPU with at least 4 GB of memory, a CUDA 13
 compatible driver (≥ 580), and 16 GB of RAM.
@@ -562,7 +562,7 @@ account, but the files cannot be redistributed and are not included here.
 Only layer 1 and the empirical (`bpp`) block require them; the simulations
 and figures built from published bundles do not.
 
-Place the three files in `ext/bpp/`, or point `BPP_EXT` to their directory.
+Place the three files in `data/raw/`, or point `BPP_EXT` to their directory.
 Their SHA-256 checksums are:
 
 ```text
