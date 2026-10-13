@@ -17,17 +17,17 @@ Replication Data for: Indirect Variational Inference: Applications to Earnings D
 Author 1:
   Name:        Balke, Neele
   Affiliation: University of Chicago
-  Identifier:  ORCID [ORCID]
+  Identifier:  ORCID [ORCID] (optional; leave blank if you prefer)
 
 Author 2:
   Name:        Bonhomme, Stéphane
   Affiliation: University of Chicago
-  Identifier:  ORCID [ORCID]
+  Identifier:  ORCID [ORCID] (optional; leave blank if you prefer)
 
 Author 3:
   Name:        Lamadon, Thibaut
   Affiliation: University of Chicago
-  Identifier:  ORCID [ORCID]
+  Identifier:  ORCID [ORCID] (optional; leave blank if you prefer)
 
 Point of Contact:
   Name:   Lamadon, Thibaut
