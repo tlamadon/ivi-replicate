@@ -22,5 +22,7 @@ c1d1949748e224f03b80803b01ea7775cb043cae1da5e89a8717452591ecfd41  data.dta
 7044d5511d7a3caa079688fe3513043907162373403f7dd53bfeaf1fa2a4cd9b  natpr.dta
 ```
 
+`python3 scripts/extract_icpsr_inputs.py PATH/TO/the-downloaded.zip` extracts
+the three files from the download into this directory and checks them.
 To keep them elsewhere, set `BPP_EXT` to their directory. Everything in this
 directory except this README is git-ignored.

@@ -106,8 +106,12 @@ To obtain them:
 2. Download the files from
    <https://www.icpsr.umich.edu/sites/psid/view/studies/210782/versions/V2>
    (the data files are in BPP's package; we use only the three above).
-3. Place them in `data/raw/` (or set `BPP_EXT` to their directory).
-4. Check them against these SHA-256 checksums (`sha256sum data/raw/*.dta`):
+3. Extract and verify them in one step:
+   `python3 scripts/extract_icpsr_inputs.py PATH/TO/the-downloaded.zip`
+   writes the three files to `data/raw/` and checks their checksums.
+   (Alternatively, place them in `data/raw/` yourself, or set `BPP_EXT` to
+   their directory.)
+4. The expected SHA-256 checksums (`sha256sum data/raw/*.dta`) are:
 
 ```text
 c1d1949748e224f03b80803b01ea7775cb043cae1da5e89a8717452591ecfd41  data.dta
@@ -418,8 +422,8 @@ The code (like the rest of the package) is licensed under the MIT License; see `
    journal EPS files.
 
 3. **Obtain the PSID data** as described in
-   [Details on each data source](#details-on-each-data-source) and put the
-   three files in `data/raw/`.
+   [Details on each data source](#details-on-each-data-source), then run
+   `python3 scripts/extract_icpsr_inputs.py PATH/TO/the-downloaded.zip`.
 
 4. **Run the full replication:**
 
@@ -583,6 +587,7 @@ Every file in the package, except the per-figure tables above.
 | File | Purpose |
 |---|---|
 | `readme_pdf.sh`, `readme/pdf.lua` | Build `README.pdf` from `README.md` (pandoc, xelatex) |
+| `extract_icpsr_inputs.py` | Extract the three ICPSR 210782 input files from the download into `data/raw/` and verify their checksums |
 | `make_dataverse_bundle.sh` | Build the Dataverse zip from the committed tree and verify it contains no PSID data |
 
 ### Library (`mlye/`)
