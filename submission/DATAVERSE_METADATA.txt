@@ -83,10 +83,10 @@ Depositor:            [YOUR NAME]
 Deposit Date:         [filled automatically]
 
 Data Sources:
-  Blundell, Richard, Luigi Pistaferri, and Ian Preston. 2026. "Replication
+  Blundell, Richard, Luigi Pistaferri, and Ian Preston. 2025. "Replication
   Data for: Consumption Inequality and Partial Insurance." Version V2.
-  Ann Arbor, MI: Inter-university Consortium for Political and Social
-  Research [distributor]. https://doi.org/10.3886/E210782V2
+  ICPSR - Interuniversity Consortium for Political and Social Research.
+  https://doi.org/10.3886/E210782V2
   Panel Study of Income Dynamics, public use dataset. Produced and
   distributed by the Survey Research Center, Institute for Social Research,
   University of Michigan, Ann Arbor, MI ([YEAR OF DOWNLOAD]).
@@ -112,10 +112,10 @@ Geographic Coverage:  United States
 TERMS
 -----------------------------------------------------------------
 
-License:  CC BY 4.0 (code also MIT; see LICENSE in the package).
-          If the form offers only CC0, choose "Custom Dataset Terms" and
-          paste: "Code: MIT License. Results and documentation: CC BY 4.0.
-          See LICENSE in the package. The package contains no PSID data."
+License:  MIT License (see LICENSE in the package). Dataverse's license
+          menu may not list MIT: choose "Custom Dataset Terms" and paste:
+          "This package is released under the MIT License; see LICENSE in
+          the package. It contains no PSID data."
 
 -----------------------------------------------------------------
 FILES TO UPLOAD

@@ -1,18 +1,3 @@
-This replication package is licensed in two parts.
-
-1. Code (replicate.py, run_all.sh, scripts/, mlye/, tests/, notebooks/,
-   workflows/ and the configuration files): MIT License, below.
-
-2. Results and documentation (output/, README.md, README.pdf,
-   data/raw/README.md): Creative Commons Attribution 4.0 International
-   (CC BY 4.0), https://creativecommons.org/licenses/by/4.0/legalcode.
-
-The package contains no PSID data. The input files from ICPSR 210782 are
-not covered by this license; they are subject to the ICPSR and PSID terms
-of use (see README.md).
-
--------------------------------------------------------------------------
-
 MIT License
 
 Copyright (c) 2026 Neele Balke, Stéphane Bonhomme and Thibaut Lamadon
@@ -34,3 +19,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+-------------------------------------------------------------------------
+
+The package contains no PSID data. The input files from ICPSR 210782 are not
+covered by this license; they are subject to the ICPSR and PSID terms of use
+(see README.md).

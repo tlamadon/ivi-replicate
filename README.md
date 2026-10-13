@@ -60,7 +60,7 @@ to rebuild all figures and tables from the published estimates.
 
 ### License for data
 
-The results included in this package (`output/`) are licensed under CC BY 4.0;
+The whole package, including the results in `output/`, is licensed under the MIT License;
 see `LICENSE`. The PSID-derived input files are not part of the package and
 are governed by the ICPSR and PSID terms of use.
 
@@ -123,7 +123,7 @@ the balanced panel, and residualizes log earnings. After layer 1,
 the expected SHA-256
 (`c9cda89925b3c35ae67ebaac8a3dfb748ac55d76750d609c0879d61555a9ffae`).
 
-Data citations: Blundell, Pistaferri and Preston (2026) for the extract and
+Data citations: Blundell, Pistaferri and Preston (2025) for the extract and
 Panel Study of Income Dynamics (2026) for the underlying survey; see
 [References](#references).
 
@@ -390,7 +390,7 @@ provenance fields in the bundles name entries of the authors' research log
 
 ### License for code
 
-The code is licensed under the MIT License; see `LICENSE`.
+The code (like the rest of the package) is licensed under the MIT License; see `LICENSE`.
 
 ## Instructions to replicators
 
@@ -507,10 +507,10 @@ Blundell, Richard, Luigi Pistaferri, and Ian Preston. 2008. "Consumption
 Inequality and Partial Insurance." *American Economic Review* 98 (5):
 1887–1921. https://doi.org/10.1257/aer.98.5.1887.
 
-Blundell, Richard, Luigi Pistaferri, and Ian Preston. 2026. "Replication Data
-for: Consumption Inequality and Partial Insurance." Version V2. Ann Arbor, MI:
-Inter-university Consortium for Political and Social Research [distributor],
-ICPSR–PSID Data Extract Repository. https://doi.org/10.3886/E210782V2.
+Blundell, Richard, Luigi Pistaferri, and Ian Preston. 2025. "Replication Data
+for: Consumption Inequality and Partial Insurance." Version V2. ICPSR -
+Interuniversity Consortium for Political and Social Research (ICPSR–PSID Data
+Extract Repository). https://doi.org/10.3886/E210782V2.
 
 Panel Study of Income Dynamics, public use dataset. Produced and distributed
 by the Survey Research Center, Institute for Social Research, University of
@@ -525,7 +525,7 @@ Every file in the package, except the per-figure tables above.
 | File | Purpose |
 |---|---|
 | `README.md`, `README.pdf` | This document (Markdown source and PDF) |
-| `LICENSE` | MIT (code) and CC BY 4.0 (results, documentation) |
+| `LICENSE` | MIT License (the whole package) |
 | `run_all.sh` | One-command replication |
 | `replicate.py` | Pipeline driver and figure registry |
 | `pyproject.toml` | Python project and dependencies |

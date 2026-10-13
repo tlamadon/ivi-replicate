@@ -17,8 +17,9 @@ Legend: ✅ done · 🟡 prepared, needs a step from you · ⬜ not started ·
 | Pinned environment | ✅ | `uv.lock`, `requirements.lock`, `mise.toml`. |
 | Runtime and hardware documented | ✅ | From the 2026-10-05 replication run manifests. |
 | README (SSDE template), Markdown + PDF | ✅ | `README.md`, `README.pdf` (`scripts/readme_pdf.sh`). |
-| LICENSE | 🟡 **[YOU]** | MIT (code) + CC BY 4.0 (results, docs) is a default; confirm with co-authors. |
-| Confirm ICPSR 210782 version | 🟡 **[YOU]** | README cites V2. Check that a fresh V2 download matches the checksums in `data/raw/README.md`. |
+| LICENSE | ✅ | MIT License for the whole package (decided 2026-10-13). |
+| ICPSR 210782 reference | ✅ | Checked 2026-10-13 against the DOI registry: V2 (issued 2025) is the latest version; DOI 10.3886/E210782V2 resolves to the ICPSR–PSID Data Extract Repository (landing page OK); citation year 2025. |
+| ICPSR 210782 download matches the package | 🟡 **[YOU]** | Download V2, unzip, then `sha256sum data.dta tax9192.dta natpr.dta` and compare with `data/raw/README.md`. Claude cannot do this (login + PSID data). |
 | PSID citation year | 🟡 **[YOU]** | Fill `[YEAR-OF-DOWNLOAD-PLACEHOLDER]` in README References. |
 | Full run from a clean clone | ⬜ **[YOU]** | `./run_all.sh` on a machine with the data; check that `verify-data` passes and `compare` is clean. Optional, since the 2026-10-05 run already exists. |
 | Dataverse bundle built and verified | ✅ | `scripts/make_dataverse_bundle.sh` → `dist/ivi-replicate-<version>.zip` + `dist/MANIFEST.txt`. Rebuild after the last commit. |
