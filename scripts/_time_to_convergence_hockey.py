@@ -1,14 +1,14 @@
 """Wall time to convergence: VI and SMC-EM on the simulation-hockeystick DGP.
 
 Sibling of `_time_to_convergence.py` (AR(1)n), targeting the hockey-stick
-DGP from `specs/compute-simulation-hockeystick.md`. Differences:
+DGP. Differences:
 
 - DGP: softplus-kink poly-2 mu + sinh-arcsinh z1 + sinh-arcsinh emission.
 - Truth calibration: alpha_0 = -0.25, alpha_1 = 0.1, mu_1 = 0.9,
-  sigma_0 = -1.8 (spec-tightened), sigma_2 = 0.35, gamma_1 = 0.34,
+  sigma_0 = -1.8 (tightened from the paper's -1.35), sigma_2 = 0.35, gamma_1 = 0.34,
   gamma_2 = 0.89, psi_1 = 0.033, psi_2 = 0.47.
 - Free-theta count: 12 (13-dim vector minus prior.z1_skew, which is
-  pinned at 0 with requires_grad=False per the spec).
+  pinned at 0 with requires_grad=False).
 - Prior class: `MarkovNormalConditionalPolyPrior(law_model='softplus',
   z1_distr='sinh')`.
 - Decoder: `MASinhEmission(theta=0, fix_theta=True, fix_beta=False)`
@@ -46,7 +46,7 @@ from mlye.models.full_model import FullModel
 
 OUT_DIR = Path("output/bundles/cells/_time_to_convergence_hockey")
 
-# 12 free parameters — PARAM_NAMES minus 'z1_skew' (pinned at 0 per spec).
+# 12 free parameters — PARAM_NAMES minus 'z1_skew' (pinned at 0).
 FREE_NAMES = [k for k in M.PARAM_NAMES if k != "z1_skew"]
 
 
@@ -57,16 +57,16 @@ def _env_float(name, default):
     return float(os.environ.get(name, default))
 
 
-# Hockey-stick truth calibration (specs/compute-simulation-hockeystick.md).
+# Hockey-stick truth calibration.
 # Overrides M.TRUTH (which defaults to the paper old sigma_0 = -1.55) so
-# simulate_from_truth uses the spec calibration.
+# simulate_from_truth uses the hockey-stick calibration.
 HOCKEY_TRUTH = dict(M.TRUTH)
 HOCKEY_TRUTH["alpha0"]        = -0.25
 HOCKEY_TRUTH["log_alpha1"]    = float(np.log(0.10))
 HOCKEY_TRUTH["mu0"]           =  0.0
 HOCKEY_TRUTH["mu1"]           =  0.9
 HOCKEY_TRUTH["mu2"]           =  0.0
-HOCKEY_TRUTH["sigma0"]        = -1.8   # spec-tightened from paper -1.35
+HOCKEY_TRUTH["sigma0"]        = -1.8   # tightened from the paper's -1.35
 HOCKEY_TRUTH["sigma1"]        =  0.0
 HOCKEY_TRUTH["sigma2"]        =  0.35
 HOCKEY_TRUTH["z1_log_std"]    = float(np.log(np.exp(0.34) - 1.0))  # gamma_1 = 0.34
@@ -120,7 +120,7 @@ def _sync(device):
 
 
 def _pin_z1_skew(prior):
-    """Pin `prior.z1_skew = 0` (requires_grad=False) per the hockey-stick spec."""
+    """Pin `prior.z1_skew = 0` (requires_grad=False)."""
     with torch.no_grad():
         prior.z1_skew.fill_(0.0)
     prior.z1_skew.requires_grad_(False)

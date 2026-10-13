@@ -328,7 +328,7 @@ class MANormalEmission(Decoder):
 
 
 class MAStudentEmission(MANormalEmission):
-    """Student-$t$ MA(1) emission (specs/models.md §3.2).
+    """Student-$t$ MA(1) emission.
 
     Thin specialisation of :class:`MANormalEmission` with the distribution
     hard-coded to ``'student_t'`` and ``theta`` defaulted to $0$ pinned --

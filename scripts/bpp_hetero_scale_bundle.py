@@ -1,8 +1,5 @@
 r"""Headline JSON bundle for the BPP hetero-scale catalogue.
 
-Entry: psid-bpp-hetero-scale-bundle
-(see specs/compute-psid_bpp_hetero_scale.md).
-
 Pure aggregation — no fitting. Collects into one self-contained JSON:
 
   fits.vi_mf / fits.vi_jn / fits.vi_sm   the three K=40 VI fits

@@ -1,10 +1,7 @@
 r"""VI fit (structured conditional-Markov posterior, extra alpha head) of
 the hetero-scale + sinh-MA(1) model on the BPP PSID earnings panel.
 
-Entry: psid-bpp-hetero-scale-vi-sm (see specs/compute-psid_bpp_hetero_scale.md).
-
-Model class (specs/compute-psid_bpp_hetero_scale.md, models.md \S1.1, 2.2,
-3.1, 4):
+Model class:
   z_t   ~ poly-2 mu + poly-2 sigma (no softplus kink, law_model='poly')
   z_1   ~ SinhArcsinh (all three z1 params free)
   alpha_i | z_1 ~ N(beta_a0 + beta_a1 z_1, exp(log_sigma_a_cond))   [iid]
@@ -311,7 +308,7 @@ def main():
 
     # Reference log p(y; theta_hat) via IWAE at converged theta.
     # (Bootstrap PF is biased under MA(1) AND not hetero-aware; see
-    #  bpp_hockey_common.py and the spec.)
+    #  bpp_hockey_common.py.)
     iwae_logp, iwae_meta = compute_iwae_ref_log_p(
         prior_v, decoder_v, y, encoder=encoder_v, K=200,
     )

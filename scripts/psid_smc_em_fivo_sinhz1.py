@@ -131,8 +131,8 @@ def fit_vi_iwae(y: torch.Tensor, hidden_dim: int = 32,
                  ndraws_iwae: int = 100, log_every: int = 200,
                  clip: float = 5.0, seed: int = 11):
     """Joint VI fit (encoder + prior + decoder, ELBO objective), evaluated
-    by the IWAE bound at L=ndraws_iwae at convergence. Per estimators.md
-    §2.1 (joint-normal H=32) and §2.2 (IWAE L=100)."""
+    by the IWAE bound at L=ndraws_iwae at convergence (joint-normal H=32,
+    IWAE L=100)."""
     T = y.shape[1]
     prior, decoder = make_model(T, y.device, seed=seed)
     torch.manual_seed(seed)

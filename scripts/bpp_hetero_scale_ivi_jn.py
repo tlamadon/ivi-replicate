@@ -1,8 +1,6 @@
 r"""IVI fit (Anderson + joint-normal-extra inner posterior) of the
 hetero-scale + sinh-MA(1) model on the BPP PSID earnings panel.
 
-Entry: psid-bpp-hetero-scale-ivi-jn (see specs/compute-psid_bpp_hetero_scale.md).
-
 Model class (same as `bpp_hetero_scale_vi_jn.py` — see that script for the
 verbose model description):
   z_t   ~ poly-2 mu + poly-2 sigma (no softplus kink, law_model='poly')
@@ -14,8 +12,7 @@ verbose model description):
 Inner encoder: JointNormalConfig(type='joint_normal_extra', dim=T,
   hidden_dim=64, extra_latents=1, regularize=1e-3, sd_clamp=3.0).
 
-Estimator: Indirect VI with the binding-equation outer loop
-  (estimators.md \S3):
+Estimator: Indirect VI with the binding-equation outer loop:
 
     Phase 1: theta_VI_obs <- inner VI on y_obs (20,000 ep, lr=1e-2, CRN).
     Phase 2: for k = 1..K_outer (10 iters):
@@ -27,8 +24,7 @@ Estimator: Indirect VI with the binding-equation outer loop
 
   The binding-equation form is mandatory: the standard damped-Picard
   formula `(1-alpha) theta + alpha b(theta)` converges to the mean-field
-  amortization-gap attractor instead of truth (see memory
-  feedback_ivi_binding_equation.md).
+  amortization-gap attractor instead of truth.
 
 Outer-loop convention: clones `_simulation_hetero_scale_ivi_sweep.py`'s
 Anderson loop verbatim, just with the BPP-side observed y_obs and the
@@ -158,7 +154,7 @@ def build_full_model(T, device, seed=11, init_beta=1.0):
 def extract_theta_dict(prior, decoder):
     """Read the 15-vec hetero-scale parameter vector off prior+decoder
     (PARAM_NAMES order). Includes alpha_eps (residual emission skew),
-    which is free under BPP-hetero per the spec (`fix_skew=False`)."""
+    which is free under BPP-hetero (`fix_skew=False`)."""
     return {
         'mu0':          float(prior.net_mu.coeffs[0].item()),
         'mu1':          float(prior.net_mu.coeffs[1].item()),

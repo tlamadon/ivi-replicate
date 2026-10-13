@@ -27,8 +27,6 @@ Pipeline:
 
 Run:
     uv run python scripts/psid_bpp_build.py
-
-See ``specs/psid_bpp_data.md`` for the full code contract.
 """
 
 from __future__ import annotations

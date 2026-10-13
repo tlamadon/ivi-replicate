@@ -316,7 +316,7 @@ def main():
     else:
         # Reference log p(y; theta_hat) via IWAE at converged theta, on
         # the UNTILED panel. (Bootstrap PF is biased under MA(1) AND not
-        # hetero-aware; see bpp_hockey_common.py and the hetero-scale spec.)
+        # hetero-aware; see bpp_hockey_common.py.)
         iwae_logp, iwae_meta = compute_iwae_ref_log_p(
             prior_v, decoder_v, y, encoder=encoder_v, K=200,
         )

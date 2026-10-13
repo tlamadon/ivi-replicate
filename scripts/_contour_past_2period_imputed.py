@@ -1,13 +1,13 @@
 """Posterior-contour bundle for the past-2-period-imputed observation.
 
-Implements `specs/compute-contour_past_2period_imputed.md`. Reads the
+Reads the
 `truth` block from a simulation-hockeystick cell JSON, pins the
 (prior, decoder) at HOCKEY_TRUTH, fits two amortised encoders
 (joint-normal + mean-field) on a fresh DGP draw, computes the true
 posterior p(z_1, z_2 | y_{1:T}) on a 2D grid via IS-marginalisation
 of z_{3:T}, and writes a self-describing JSON bundle. Also renders
-a quick-check matplotlib PDF/PNG (the deliberate compute-scope
-exception documented in the spec).
+a quick-check matplotlib PDF/PNG (a deliberate compute-scope
+exception).
 
 Output:
   output/bundles/cells/_contour_past_2period_imputed/contour_bundle.json
@@ -28,7 +28,7 @@ import torch.nn.functional as F
 import matplotlib.pyplot as plt
 from torch.distributions import Normal
 
-# scripts/ is on PYTHONPATH per the spec's invocation.
+# scripts/ is expected on PYTHONPATH.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from softplus_sinh_posterior_comparison import (
     PARAM_NAMES, build_prior_decoder, set_prior_decoder_to_truth,
@@ -51,7 +51,7 @@ Y_OBS_VALUES = [-0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
 
 
 # ----------------------------------------------------------------------
-# Config from env (with spec defaults)
+# Config from env (with defaults)
 # ----------------------------------------------------------------------
 
 def _env_int(name, default):

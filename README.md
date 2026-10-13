@@ -384,10 +384,9 @@ The bootstrap quantities come from the shipped `output/bundles/cells/_bpp_hetero
 | `mlye/` | Estimation library: encoders, decoders, priors, the full VI model, SMC and FIVO |
 | `tests/` | Consistency checks (pipeline graph, imports, seeding, environment pins, figure registry) |
 
-Every file is listed in [Appendix A](#appendix-a-file-inventory). Code
-comments sometimes cite internal design notes (`specs/…`, `journal/…`) from
-the authors' development repository; these notes are not part of the package
-and are not needed to run it.
+Every file is listed in [Appendix A](#appendix-a-file-inventory). A few
+provenance fields in the bundles name entries of the authors' research log
+(`journal/…`); the log is not part of the package and is not needed to run it.
 
 ### License for code
 

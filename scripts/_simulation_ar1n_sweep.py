@@ -1,6 +1,6 @@
 r"""Layer 1a fit script for the simulation-ar1n sweep.
 
-Per `specs/compute-simulation-ar1n.md`. Six configurations on the
+Six configurations on the
 AR(1)+Normal canonical DGP (mu_1=0.9, sigma_0=-1.48 preset of
 `mlye/simulator/simulator.py`; N=30000, T=6):
 
@@ -47,7 +47,7 @@ Env vars (with defaults):
   OBS_SEED             y_obs simulation seed               (11)
   VI_SEED              encoder init seed                   (OBS_SEED*1000+7)
 
-  Truth overrides (default = spec calibration):
+  Truth overrides (default = canonical calibration):
     MU1 (0.9), SIGMA0 (-1.48), SIGMA_Z1 (-0.733),
     LOG_SIGMA_EPS (-1.470).
 
@@ -70,7 +70,7 @@ from smc_truth_profile import _Bundle
 from mlye.eval import BootstrapParticleFilter
 
 
-# Map spec's ENCODER label to mlye encoder_type strings.
+# Map the ENCODER label to mlye encoder_type strings.
 ENCODER_LABEL_TO_TYPE = {
     'mean_field':    'normal_diagonal',
     'tridiag':       'tridiag_joint_normal',
@@ -79,7 +79,7 @@ ENCODER_LABEL_TO_TYPE = {
     'tjn':           'transformed_joint_normal',
 }
 
-# Map ENCODER label to the spec-declared filename stem.
+# Map ENCODER label to the filename stem.
 ENCODER_LABEL_TO_FILENAME_TAG = {
     'mean_field':    'meanfield',
     'tridiag':       'tridiag',
@@ -129,7 +129,7 @@ def vec_to_theta(vec):
 def L2_free(theta, truth):
     """L2 distance over the 8 FREE parameters (PARAM_NAMES[FREE_INDICES]).
 
-    Per spec the eight free coords are
+    The eight free coords are
     (mu0, mu1, mu2, sigma0, sigma1, sigma2, z1_log_std, log_sigma_eps);
     the pinned-shape coords (log_beta, theta_MA, z1_skew, z1_log_tail)
     are excluded.
@@ -196,7 +196,7 @@ def fit_vi_inner(y, n_epochs, lr, log_every,
                   n_retries=10, eps_fixed=None, encoder_label='mean_field'):
     """Cold-start a VI fit with the chosen encoder family.
 
-    `encoder_label` matches the spec's ENCODER env-var labels
+    `encoder_label` matches the ENCODER env-var labels
     (mean_field / tridiag / jn / struct_markov). Strict CRN: the model
     is rebuilt fresh under `torch.manual_seed(vi_seed)` on every call,
     so the encoder init AND the AdamW initial state are identical
@@ -433,7 +433,7 @@ def mle_noerror_lbfgs(y, truth, max_iter=200, tolerance_grad=1e-7,
                        tolerance_change=1e-9, history_size=10, device=None):
     """Model B closed-form MLE via L-BFGS over 7 free parameters.
 
-    Per spec 'No-measurement-error MLE configuration to run': initialise
+    No-measurement-error MLE configuration: initialise
     at truth restricted to the seven free coords, minimise
     `-M.poly2_chain_logp(...).mean()`, record the loss trajectory, and
     return the converged theta + diagnostic logp values.
@@ -539,7 +539,7 @@ def main():
         assert encoder_label in ENCODER_LABEL_TO_TYPE, \
             f"unknown ENCODER: {encoder_label}"
     # For both METHOD=picard and METHOD=anderson the inner encoder family
-    # is *always* mean-field per the spec / IVI comparison study; we
+    # is *always* mean-field by design (IVI comparison study); we
     # silently override any other ENCODER value here.
     if method in ('picard', 'anderson'):
         encoder_label = 'mean_field'

@@ -46,7 +46,7 @@ Env vars (with defaults):
                        TJN fit) during which decoder.log_sigma
                        and decoder.log_beta are pinned        (1000)
   N                    panel size                            (30000)
-  T                    panel length. The canonical spec pins
+  T                    panel length. The canonical design pins
                        T=6; the T=40 IVI-JN variant sets T=40.
                        When T!=6 the cell filename gains a
                        `_T<T>` suffix so it never collides with
@@ -59,7 +59,7 @@ Env vars (with defaults):
                        pick it up.
                        (output/bundles/cells/_simulation_hockeystick_ivi_sweep)
 
-  Truth overrides (default = simulation-hockeystick.md paper spec):
+  Truth overrides (default = paper calibration):
   MU1                  (default 0.9)
   SIGMA0               (default -1.35)
   SIGMA2               (default 0.35)
@@ -107,7 +107,7 @@ def _wide_build_encoder(encoder_type, T, regularize=1e-3, hidden_dim=64):
 M.build_encoder = _wide_build_encoder
 
 
-# Map spec's ENCODER label to mlye encoder_type strings.
+# Map the ENCODER label to mlye encoder_type strings.
 ENCODER_LABEL_TO_TYPE = {
     'jn':            'joint_normal',
     'mean_field':    'normal_diagonal',
@@ -116,9 +116,8 @@ ENCODER_LABEL_TO_TYPE = {
     'tjn':           'transformed_joint_normal',
 }
 
-# Map ENCODER label to the spec-declared filename stem (per the VI-only
-# cells table in simulation-hockeystick.md). Mean-field is rendered
-# without the underscore in filenames to match the spec.
+# Map ENCODER label to the expected filename stem. Mean-field is rendered
+# without the underscore in filenames.
 ENCODER_LABEL_TO_FILENAME_TAG = {
     'jn':            'jn',
     'mean_field':    'meanfield',
@@ -136,7 +135,7 @@ def build_full_model_with_encoder(encoder_label, T, device):
     hidden_dim=64). For 'tjn' we instantiate TJN directly because
     FlowConfig does not currently expose hidden_dim. In every case
     `prior.z1_skew` is pinned at 0 (`requires_grad=False`) on the
-    returned model per the 2026-06-15 spec.
+    returned model.
     """
     encoder_type = ENCODER_LABEL_TO_TYPE[encoder_label]
     if encoder_label == 'tjn':
@@ -152,7 +151,7 @@ def build_full_model_with_encoder(encoder_label, T, device):
     return model
 
 
-# Truth: simulation-hockeystick.md paper old calibration; mu1, sigma0,
+# Truth: paper old calibration; mu1, sigma0,
 # sigma2, log_beta overridable via env vars.
 _MU1     = float(os.environ.get('MU1',     0.9000))
 _SIGMA0  = float(os.environ.get('SIGMA0', -1.3500))
@@ -193,7 +192,7 @@ def L2(theta, truth):
 def _pin_z1_skew(model):
     """Pin `prior.z1_skew = 0` with `requires_grad=False`.
 
-    Per simulation-hockeystick.md (2026-06-15): the DGP truth has
+    The DGP truth has
     z_1 skewness 0 (symmetric sinh-arcsinh), and the inference model
     pins z1_skew at 0 -- reducing free theta from 13 to 12.
     """
@@ -215,8 +214,8 @@ def _set_prior_decoder_from_dict(model, theta):
             dtype=model.prior.net_sigma.coeffs.dtype,
             device=model.prior.net_sigma.coeffs.device))
         model.prior.z1_log_std.fill_(theta['z1_log_std'])
-        # z1_skew is pinned at 0 in the inference model per spec
-        # (2026-06-15); ignore any non-zero value in the input dict.
+        # z1_skew is pinned at 0 in the inference model by design;
+        # ignore any non-zero value in the input dict.
         model.prior.z1_skew.zero_()
         model.prior.z1_log_tail.fill_(theta['z1_log_tail'])
         model.decoder.log_sigma.fill_(theta['log_sigma_eps'])
@@ -237,10 +236,9 @@ def fit_encoder_only_at_theta(theta, y, T, vi_seed, n_epochs, lr, device,
     For `encoder_label='tjn'`, the encoder is the same TJN $h=64$ class as
     Phase 1 / Phase 2. The TJN warm-start convention degenerates here because
     prior+decoder are frozen at `theta` throughout, so the "internal JN
-    warm-start" of `estimators.md` \S2.1 would only train (and then discard)
+    warm-start" would only train (and then discard)
     JN encoder weights without changing prior+decoder; we therefore train
-    the TJN encoder directly from cold, matching the spec's noted
-    simplification.
+    the TJN encoder directly from cold (a deliberate simplification).
     """
     last_err = None
     for s in M._retry_seeds(vi_seed, n_retries):
@@ -292,7 +290,7 @@ def fit_vi_inner(model, y, n_epochs, lr, log_every,
                   theta_avg_epochs=0):
     """Cold- or warm-start a VI fit with the chosen encoder family.
 
-    `encoder_label` matches the spec's ENCODER env-var labels (jn /
+    `encoder_label` matches the ENCODER env-var labels (jn /
     mean_field / struct_markov / tjn) and is the cell's posterior
     family. Warm-start (picard_warm) reuses the passed-in `model` and
     ignores `encoder_label`.
@@ -522,7 +520,7 @@ def main():
         f"unknown METHOD: {method}"
     assert emission in ('sinh', 'degenerate'), \
         f"unknown EMISSION: {emission}"
-    # Per spec (2026-06-22): mle_direct requires EMISSION=degenerate;
+    # mle_direct requires EMISSION=degenerate;
     # every other METHOD ignores EMISSION (defaults to sinh).
     if method == 'mle_direct':
         assert emission == 'degenerate', \
@@ -536,17 +534,17 @@ def main():
     if not is_mle_direct:
         assert encoder_label in ENCODER_LABEL_TO_TYPE, \
             f"unknown ENCODER: {encoder_label}"
-    # Per spec (2026-06-15): Picard cells are JN-only; Anderson and
+    # Picard cells are JN-only; Anderson and
     # vi_only honour the env-passed ENCODER. The IVI posterior cells
     # use METHOD=anderson with ENCODER in {mean_field, struct_markov,
     # tjn}. METHOD=anderson with ENCODER=tridiag_jn is out of scope
-    # for this spec; coerce to vi_only to make the cell self-consistent
+    # here; coerce to vi_only to make the cell self-consistent
     # rather than fail mid-run.
     if method in ('picard_cold', 'picard_warm'):
         encoder_label = 'jn'
     if method == 'anderson' and encoder_label == 'tridiag_jn':
         print(f"[warn] METHOD=anderson with ENCODER=tridiag_jn is out of "
-              f"scope for this spec; coercing to METHOD=vi_only.", flush=True)
+              f"scope; coercing to METHOD=vi_only.", flush=True)
         method = 'vi_only'
         is_vi_only = True
 
@@ -603,8 +601,8 @@ def main():
     if is_mle_direct:
         # METHOD=mle_direct + EMISSION=degenerate path.
         # No encoder; the inference model is the prior alone, fit by direct
-        # MLE on the closed-form prior log-likelihood at z = y_obs (per
-        # models.md S3.5). No Phase 1 / Phase 2 -- a single MLE fit on the
+        # MLE on the closed-form prior log-likelihood at z = y_obs.
+        # No Phase 1 / Phase 2 -- a single MLE fit on the
         # 10 free prior + z_1 coordinates (psi_1, psi_2 do not exist in this
         # model class). prior.z1_skew is pinned at 0 (`requires_grad=False`)
         # to match the IVI cells' 12-coordinate convention; the
@@ -885,7 +883,7 @@ def main():
     elif method == 'anderson':
         if encoder_label == 'jn':
             # JN Anderson cell's filename is unchanged for backward
-            # compatibility (analysis-hockeystick-ivi.md consumes this
+            # compatibility (downstream analysis consumes this
             # exact path).
             fname = f"anderson_alpha{alpha:.2f}_m{m_mem}_ep{n_epochs}_{suffix}.json"
         else:
@@ -903,7 +901,7 @@ def main():
     RESTART_FACTOR = 1.5
 
     # Build the cell's static config block. Several fields are null for
-    # vi_only cells; per spec they must be `null` (not 0 / NaN).
+    # vi_only cells; they must be `null` (not 0 / NaN).
     config = {
         'dgp':              'simulation-hockeystick',
         'method':           method,
@@ -942,7 +940,7 @@ def main():
     }
 
     if is_vi_only:
-        # VI-only cells: skip Phase 2 entirely. Per spec (2026-06-22),
+        # VI-only cells: skip Phase 2 entirely. By design,
         # trajectory is the empty list and final_theta / final_L2 copy
         # the Phase 1 estimate so downstream consumers can read these
         # keys uniformly across cells.
@@ -992,9 +990,7 @@ def main():
                     theta_avg_epochs=theta_avg_epochs)
             elif encoder_label == 'tjn':
                 # TJN inner fit: internal JN warm-start then TJN, per
-                # the per-inner-fit warm-start convention of
-                # estimators.md S2.1 (specs/simulation-hockeystick.md
-                # "IVI posterior cells to run" / Phase 2).
+                # the per-inner-fit warm-start convention.
                 print(f"  [tjn/it{k}] internal JN warm-start "
                       f"({n_epochs} ep) ...", flush=True)
                 theta_VI_jn_inner, _jn_trace_inner, _jn_used_seed, _model_jn = \

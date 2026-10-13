@@ -15,8 +15,7 @@ hetero-mean-with-independence variant of `bpp_hetero_mean_indep_vi_jn.py`
 Inner encoder: JointNormalConfig(type='joint_normal_extra', dim=T,
   hidden_dim=64, extra_latents=1, regularize=1e-3, sd_clamp=3.0).
 
-Estimator: Indirect VI with the binding-equation outer loop
-  (estimators.md \S3):
+Estimator: Indirect VI with the binding-equation outer loop:
 
     Phase 1: theta_VI_obs <- inner VI on y_obs (20,000 ep, lr=1e-2, CRN).
     Phase 2: for k = 1..K_outer (10 iters):

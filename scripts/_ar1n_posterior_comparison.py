@@ -1,6 +1,6 @@
 r"""AR(1) + Normal helper module --- the well-specified Gaussian baseline.
 
-DGP (canonical AR(1) preset, per simulation-ar1n.md):
+DGP (canonical AR(1) preset):
   - mu(z)    = mu_1 z                       (mu_0 = mu_2 = 0 pinned)
   - sigma(z) = softplus(sigma_0)            (sigma_1 = sigma_2 = 0 pinned)
   - z_1      ~ N(0, softplus(z1_log_std))   (normal initial state)
@@ -28,7 +28,7 @@ mu0 (idx 2), mu1 (idx 3), mu2 (idx 4), sigma0 (idx 5), sigma1 (idx 6),
 sigma2 (idx 7), z1_log_std (idx 8), log_sigma_eps (idx 11). Note: the
 four "extra" poly coords mu0, mu2, sigma1, sigma2 equal 0 at the
 canonical AR(1) truth but are FREE during estimation (initialised at
-0 and let drift) per spec `specs/compute-simulation-ar1n.md` Model A.
+0 and let drift) in Model A.
 """
 import time
 
@@ -77,7 +77,7 @@ PARAM_NAMES = list(TRUTH.keys())
 # Free-parameter indices in PARAM_NAMES order (Model A: eight free params).
 # All six poly-2 coefficients are free; only the four shape parameters
 # (z1_skew, z1_log_tail, log_beta) plus the unused alpha0 / log_alpha1
-# remain pinned. See specs/compute-simulation-ar1n.md "Model A".
+# remain pinned.
 FREE_INDICES = [2, 3, 4, 5, 6, 7, 8, 11]
 # mu0, mu1, mu2, sigma0, sigma1, sigma2, z1_log_std, log_sigma_eps
 FREE_NAMES   = [PARAM_NAMES[i] for i in FREE_INDICES]
@@ -120,7 +120,7 @@ def build_encoder(encoder_type, T, regularize=1e-3, hidden_dim=32):
 def build_prior_decoder(T, device):
     """Build the Model-A inference prior + Gaussian decoder.
 
-    Per spec `specs/compute-simulation-ar1n.md` Model A: the full
+    In Model A, the full
     poly-2 prior is the inference class. All six polynomial
     coefficients (mu_0, mu_1, mu_2, sigma_0, sigma_1, sigma_2) are
     FREE during estimation. The four "extra" coords
@@ -147,7 +147,7 @@ def _apply_pinning_masks(model, device):
     """Pin the four shape parameters that stay at truth for Model A:
     log_beta = 0, theta_MA = 0, z1_skew = 0, z1_log_tail = 0.
 
-    Per spec `specs/compute-simulation-ar1n.md` Model A, all six
+    In Model A, all six
     polynomial coefficients (mu_0, mu_1, mu_2, sigma_0, sigma_1,
     sigma_2) are FREE. The four "extra" coords
     (mu_0, mu_2, sigma_1, sigma_2) are initialised to truth (= 0) but
@@ -195,7 +195,7 @@ def _apply_pinning_masks(model, device):
     # are intentionally left ALONE here -- they are all free under
     # Model A. Earlier versions of this helper pinned mu_0, mu_2,
     # sigma_1, sigma_2 via gradient hooks; that pinning has been
-    # removed to match the spec.
+    # removed.
 
 
 def build_full_model(encoder_type, T, device):
@@ -411,7 +411,7 @@ def ar1n_marginal_logp(y, mu1, sigma0, z1_log_std, log_sigma_eps):
 def poly2_chain_logp(y, mu0, mu1, mu2, sigma0, sigma1, sigma2, z1_log_std):
     r"""Per-individual log-likelihood under Model B (no measurement error).
 
-    Spec: `specs/compute-simulation-ar1n.md` "Model B" --- the
+    Model B is the
     degenerate emission y_t = z_t, sigma_eps = 0. The poly-2 prior is
     arbitrary (NOT restricted to AR(1)); each conditional density is
     closed-form Gaussian, so

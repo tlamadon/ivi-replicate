@@ -1,10 +1,10 @@
-"""Shared helpers for the BPP-hockey catalogue (specs/psid_bpp_hockey.md).
+"""Shared helpers for the BPP-hockey catalogue.
 
 The main export is ``compute_iwae_ref_log_p``: a reference marginal
 log-likelihood evaluator that **correctly accounts for MA(1)**.
 
 Why a custom helper instead of the SMC bootstrap PF (the convention
-used by the ABB sibling in psid_estimates.md)?
+used by the ABB sibling)?
 
 The bootstrap particle filter weights particles by the marginal
 emission density ``p(y_t | z_t)``. Under MA(1) the conditional
@@ -26,7 +26,7 @@ Behaviour:
   for `train_epochs` iterations. The trained encoder is then used
   for the IWAE bound at the entry's converged theta.
 
-This matches the spec's intent: the reference is ``log p(y; theta_hat)``
+By design, the reference is ``log p(y; theta_hat)``
 where ``theta_hat`` is the entry's own converged point estimate,
 not a re-fit.
 """

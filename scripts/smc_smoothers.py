@@ -4,7 +4,7 @@ This module is the canonical home for the FFBS posterior sampler used by
 SMC-EM E-steps. It exists because `scripts/climb_per_step.smc_ffbs_sample`
 is, historically, a sequential-importance sampler that does *not* resample
 between forward propagation steps — at long T (e.g. T=40 in the longt /
-ar1n-smc-em-K-sweep specs) the IS weights collapse exponentially and the
+ar1n-smc-em-K-sweep runs) the IS weights collapse exponentially and the
 backward FFBS draw is dominated by a handful of effective trajectories. The
 result is a smoothed-score bias that does **not** decay with K (empirically
 ∝ K^(-0.2) instead of the predicted K^(-1)).
@@ -13,8 +13,7 @@ The function below adds a per-step systematic resample inside the forward
 loop. It is otherwise drop-in compatible with `climb_per_step.smc_ffbs_sample`:
 same signature `(prior, decoder, y, K) -> (N, T) tensor` and same backward
 FFBS sweep. With resampling enabled the bias decays as K^(-1) until it hits
-the M-step stochastic-gradient floor (see specs/compute-simulation-ar1n_smc_em_K_sweep.md
-"Wall-time estimate" + the journal entry for the AR(1)n K-sweep).
+the M-step stochastic-gradient floor.
 
 Two entry points:
 - `smc_ffbs_sample_resampled(prior, decoder, y, K)`: systematic resample at
@@ -146,8 +145,7 @@ def smc_ffbs_sample_resampled(prior, decoder, y, K):
 @torch.no_grad()
 def smc_ffbs_sample_genealogy(prior, decoder, y, K):
     """SMC smoother with systematic-resampled forward + **ancestry-tracking**
-    backward pass (i.e. the "genealogy" convention of specs/estimators.md
-    §1.2).
+    backward pass (i.e. the "genealogy" convention).
 
     Forward pass is identical to `smc_ffbs_sample_resampled`. The
     difference is entirely in the backward pass:
@@ -231,7 +229,7 @@ def select_smc_smoother(resample: str):
                        backward — the contract default).
     `"genealogy"`  -> `smc_ffbs_sample_genealogy` (proper SMC forward,
                        ancestry-tracking backward — the T²/K variance
-                       comparator; see specs/estimators.md §1.2).
+                       comparator).
     `"none"`       -> `smc_ffbs_sample_no_resample` (the legacy SIS path
                        imported from `climb_per_step`).
     """

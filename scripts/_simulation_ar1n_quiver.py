@@ -1,8 +1,7 @@
 r"""Picard binding-function quiver in (mu_1, log_sigma_eps) for the
 simulation-ar1n DGP with the mean-field (normal_diagonal) encoder.
 
-Layer 1c of compute-simulation-ar1n.md. At each (m1_0, lse_0) grid cell
-we:
+At each (m1_0, lse_0) grid cell we:
 
   - simulate y_sim(theta_0) via M.reparam_simulate using strong CRN
     (z_noise, y_noise pre-drawn at obs_seed and reused everywhere);
@@ -39,8 +38,7 @@ Invocation modes:
   4. Default (no CELL_I/CELL_J, no MODE): sequential full sweep
      (debugging / legacy path); emits the canonical `quiver.json`.
 
-Upstream input: the Picard mean-field cell of simulation-ar1n. See
-specs/compute-simulation-ar1n.md (Layer 1c) for the contract.
+Upstream input: the Picard mean-field cell of simulation-ar1n.
 
 Env vars (with defaults):
   N_GRID         grid points per axis                  (10)

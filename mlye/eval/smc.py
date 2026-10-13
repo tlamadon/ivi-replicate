@@ -40,8 +40,7 @@ class BootstrapParticleFilter:
             resample_every_step: run the resample step after every filter
                 update (the standard SIR schedule). Almost always True; the
                 False branch is retained for diff studies against the
-                pre-2026-06-30 SIS behaviour (see specs/estimators.md §1.1
-                and journal/2026-06-30-smc-ffbs-resampling-fix.md).
+                pre-2026-06-30 SIS behaviour.
             resample_method: "systematic" (default; low-variance, one uniform
                 draw per individual, deterministic stratified inverse-CDF)
                 or "multinomial" (per-torch.multinomial; higher variance,

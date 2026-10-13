@@ -11,8 +11,7 @@ scale-heterogeneity model:
   alpha | z_1 ~ N(beta_a0 + beta_a1 z_1, sigma_a_cond)
   y_t   = z_t + exp(alpha_i) * SinhArcsinh(0,1,0,beta) noise
 
-12 free parameters in PARAM_NAMES order (z1_skew pinned at 0 per
-specs/compute-simulation-hetero-scale.md, matching the hockey-stick
+12 free parameters in PARAM_NAMES order (z1_skew pinned at 0, matching the hockey-stick
 sibling):
   mu0, mu1, mu2, sigma0, sigma1, sigma2,
   z1_log_std, z1_log_tail,
@@ -23,7 +22,7 @@ The conditional (beta_a0, beta_a1, log_sigma_a_cond) and the marginal
 marginal-preserving reparametrization in
 `_scale_hetero_correlation_sweep.calibrate_extra_hetero`.
 
-Env vars (with defaults; spec headers map 1-to-1):
+Env vars (with defaults):
   METHOD               picard_cold | anderson | vi_only      (anderson)
   ENCODER              jn | mean_field | struct_markov | tjn (jn)
                        Required when METHOD=vi_only; ignored otherwise.
@@ -42,7 +41,7 @@ Env vars (with defaults; spec headers map 1-to-1):
   N                    panel size                            (30000)
   T                    panel periods                         (6)
 
-  Truth overrides (default = simulation-hetero-scale spec calibration):
+  Truth overrides (default calibration):
   RHO                  correlation target (default 0.30)
   MU_ALPHA_MARG        log(0.10) ~= -2.303
   SIGMA_ALPHA_MARG     0.30
@@ -111,8 +110,8 @@ from _scale_hetero_correlation_ivi import (
     anderson_step,
 )
 
-# Local PARAM_NAMES omits z1_skew (pinned at 0 in the estimator per
-# specs/compute-simulation-hetero-scale.md). The upstream simulator still
+# Local PARAM_NAMES omits z1_skew (pinned at 0 in the estimator).
+# The upstream simulator still
 # expects the 13-vec with z1_skew at index 7, so we wrap it by padding a zero.
 PARAM_NAMES = [
     'mu0', 'mu1', 'mu2',
@@ -132,7 +131,7 @@ def reparam_simulate(theta_vec, u_z, u_alpha, u_y):
 
 # ----------------------------------------------------------------- env / labels
 
-# Map spec's ENCODER label to a build directive. For IVI cells the encoder is
+# Map the ENCODER label to a build directive. For IVI cells the encoder is
 # always 'jn' (joint-normal-extra h=64); for vi_only cells the label drives
 # the encoder family.
 ENCODER_LABEL_TO_FILENAME_TAG = {
@@ -219,7 +218,7 @@ class StructuredMarkovExtraPosterior(Encoder):
     (mu_alpha, log_sigma_alpha); the (T+1)-vec latent matches the
     convention in `mlye/models/encoders/base.split_latent`.
 
-    Mirrors the spec's `struct_markov` cell at h=64. The alpha head is a
+    Mirrors the `struct_markov` cell at h=64. The alpha head is a
     single hidden layer at the same width.
     """
 
@@ -651,7 +650,7 @@ def main():
         torch.cuda.empty_cache()
 
     if is_mle_direct:
-        # METHOD=mle_direct + EMISSION=degenerate (per spec 2026-06-22).
+        # METHOD=mle_direct + EMISSION=degenerate.
         # No encoder; the inference model is the homogeneous prior alone
         # (no extra-hetero branch, since α enters only through the emission).
         # Fit by direct MLE on the closed-form prior log-likelihood at
@@ -1125,7 +1124,7 @@ def main():
     # The current `mlye/eval/smc.py` BootstrapParticleFilter assumes a
     # centred residual density (no per-individual scale latent), so it
     # cannot be used as-is. Until a hetero-aware variant lands we emit
-    # None and print a warning. See spec Layer 1 Phase 3.5 note.
+    # None and print a warning.
     smc_log_p_at_truth = None
     print(f"\n[3d] SMC log p_hat at truth: SKIPPED (hetero-aware bootstrap "
           f"PF not yet implemented; see follow-up).", flush=True)

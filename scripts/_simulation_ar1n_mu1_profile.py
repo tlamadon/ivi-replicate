@@ -1,7 +1,6 @@
 r"""ELBO + log-likelihood along the truth<->VI line on simulation-ar1n.
 
-Layer 1b of compute-simulation-ar1n.md. The slice through the 8-D
-free-parameter space joining theta_truth (t=0) and theta_VI_obs (t=1):
+The slice through the 8-D free-parameter space joining theta_truth (t=0) and theta_VI_obs (t=1):
 
     theta(t) = theta_truth + t * (theta_VI_obs - theta_truth)
 
@@ -39,20 +38,20 @@ Invocation modes:
   2. Aggregate (MODE=aggregate): merge profile_cell_*.json into profile.json.
   3. Default: sequential N_GRID-cell sweep, emit profile.json incrementally.
 
-Env vars (with defaults --- matched to spec):
+Env vars (with defaults):
   N_GRID            grid points on the truth<->VI line      (20)
   N_EPOCHS          amortized encoder fit epochs            (10000)
   LR                amortized encoder Adam learning rate    (1e-2)
   N_EPOCHS_NONAMORT non-amortized fit epochs                (2000)
   LR_NONAMORT       non-amortized Adam learning rate        (1e-3)
-                    NOTE: the spec invocation block lists 1e-2 but at
+                    NOTE: 1e-2 is not used here: at
                     2*N*T = 360k free scalars the Adam-adaptive
                     per-scalar updates oscillate at 1e-2 and the
                     converged ELBO ends up *worse* than the warm-init.
                     1e-3 sits ~0.005 nats below the warm-init (the
                     per-individual MF optimum) at convergence. Set
-                    `LR_NONAMORT=1e-2` explicitly if you need to match
-                    the spec literally.
+                    `LR_NONAMORT=1e-2` explicitly to use
+                    1e-2 anyway.
   FIX_NOISE         step-to-step CRN on the encoder eps     (1)
   NOISE_SEED        CRN noise draw seed                     (12345)
   MU1_MIN           left endpoint of the grid in mu1 space  (0.5)
@@ -60,8 +59,7 @@ Env vars (with defaults --- matched to spec):
                     Grid endpoints are user-set in mu1 (the AR(1)
                     coefficient); the corresponding t endpoints are
                     back-computed via t = (mu1 - mu1_truth) /
-                    (mu1_vi_obs - mu1_truth). See spec Layer 1b
-                    "Slice geometry".
+                    (mu1_vi_obs - mu1_truth).
   OBS_SEED          y_obs re-simulation seed override       (upstream)
   VI_SEED           encoder cold-start seed override        (upstream)
   CELL_I            single-cell mode (0..N_GRID-1)          (unset)
@@ -85,7 +83,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _ar1n_posterior_comparison as M
 
 
-# Mean-field encoder hidden width (per spec Layer 1b).
+# Mean-field encoder hidden width.
 #
 # We deliberately fit the mean-field encoder family at every grid cell,
 # NOT the joint-normal family. On this DGP joint-normal is nearly
@@ -115,8 +113,8 @@ EXTRA_COORDS = ('mu0', 'mu2', 'sigma1', 'sigma2')
 
 LOG_2PI = float(math.log(2.0 * math.pi))
 
-# Reasonable judgment call (see commit log): the spec says "CRN reuses
-# the same u across epochs" for step 4. At 2*N*T free scalars the
+# Reasonable judgment call: a natural choice for step 4 would be
+# "CRN reuses the same u across epochs". At 2*N*T free scalars the
 # optimiser can drive log_tau and nu jointly to exploit a single
 # sample (the z = nu + tau*u shift becomes ambiguous and the
 # single-sample "ELBO" blows past log p, which is impossible for the

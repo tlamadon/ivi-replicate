@@ -28,7 +28,7 @@ the truth.
 
 Upstream input: the Picard-mean-field cell of simulation-ar1n. The
 upstream JSON's `truth`, `theta_VI_obs`, and `final_theta` provide
-figure markers; the grid is centred on the spec calibration truth
+figure markers; the grid is centred on the default calibration truth
 (mu_1^truth = 0.9) with half-width 0.35.
 
 Restartable: if `binding_mu1.json` already exists and its config
@@ -82,7 +82,7 @@ def bstar_path():
 
 HIDDEN_DIM = 32
 
-# Grid half-width around mu_1^truth, per spec Layer 1d.
+# Grid half-width around mu_1^truth.
 GRID_HALF_WIDTH = 0.35
 
 
