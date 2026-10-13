@@ -16,17 +16,17 @@ Replication Data for: Indirect Variational Inference: Applications to Earnings D
 
 Author 1:
   Name:        Balke, Neele
-  Affiliation: [AFFILIATION]
+  Affiliation: University of Chicago
   Identifier:  ORCID [ORCID]
 
 Author 2:
   Name:        Bonhomme, Stéphane
-  Affiliation: [AFFILIATION]
+  Affiliation: University of Chicago
   Identifier:  ORCID [ORCID]
 
 Author 3:
   Name:        Lamadon, Thibaut
-  Affiliation: [AFFILIATION]
+  Affiliation: University of Chicago
   Identifier:  ORCID [ORCID]
 
 Point of Contact:
@@ -89,7 +89,7 @@ Data Sources:
   https://doi.org/10.3886/E210782V2
   Panel Study of Income Dynamics, public use dataset. Produced and
   distributed by the Survey Research Center, Institute for Social Research,
-  University of Michigan, Ann Arbor, MI ([YEAR OF DOWNLOAD]).
+  University of Michigan, Ann Arbor, MI (2025).
 
 Software:
   Name: Python    Version: 3.12

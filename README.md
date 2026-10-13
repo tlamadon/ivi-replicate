@@ -130,7 +130,7 @@ the expected SHA-256
 (`c9cda89925b3c35ae67ebaac8a3dfb748ac55d76750d609c0879d61555a9ffae`).
 
 Data citations: Blundell, Pistaferri and Preston (2025) for the extract and
-Panel Study of Income Dynamics (2026) for the underlying survey; see
+Panel Study of Income Dynamics (2025) for the underlying survey; see
 [References](#references).
 
 ## Dataset list
@@ -520,7 +520,7 @@ Extract Repository). https://doi.org/10.3886/E210782V2.
 
 Panel Study of Income Dynamics, public use dataset. Produced and distributed
 by the Survey Research Center, Institute for Social Research, University of
-Michigan, Ann Arbor, MI ([YEAR-OF-DOWNLOAD-PLACEHOLDER]).
+Michigan, Ann Arbor, MI (2025).
 
 ## Appendix A: File inventory
 
