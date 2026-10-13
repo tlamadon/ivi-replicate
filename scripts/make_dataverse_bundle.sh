@@ -59,6 +59,6 @@ find . -type f | LC_ALL=C sort | while read -r f; do
   printf '%s\t%s\t%s\n' "${f#./}" "$(stat -c %s "$f")" "$(sha256sum "$f" | cut -d' ' -f1)"
 done > ../MANIFEST.txt
 cd ..
-zip -qr -X "${name}.zip" "${name}"
+python3 -c "import shutil, sys; shutil.make_archive(sys.argv[1], 'zip', '.', sys.argv[1])" "${name}"
 echo "verified: $(wc -l < MANIFEST.txt) files, no PSID data"
 echo "wrote dist/${name}.zip ($(du -h "${name}.zip" | cut -f1)) and dist/MANIFEST.txt"
