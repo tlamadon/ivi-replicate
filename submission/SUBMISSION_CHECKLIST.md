@@ -23,10 +23,10 @@ Legend: ✅ done · 🟡 prepared, needs a step from you · ⬜ not started ·
 | PSID citation year | ✅ | 2025. |
 | Full run from a clean clone | ⬜ **[YOU]** | `./run_all.sh` on a machine with the data; check that `verify-data` passes and `compare` is clean. Optional, since the 2026-10-05 run already exists. |
 | Dataverse bundle built and verified | ✅ | `scripts/make_dataverse_bundle.sh` → `dist/ivi-replicate-<version>.zip` + `dist/MANIFEST.txt`. Rebuild after the last commit. |
-| Dataverse metadata | 🟡 **[YOU]** | `submission/DATAVERSE_METADATA.txt`; affiliations filled (University of Chicago); still fill the contact email (ORCIDs optional). |
-| **Dataverse dataset created and cited** | 🟡 **[YOU]** | Draft created in the JOLE collection; DOI 10.7910/DVN/X7CAT0 is in README.md/README.pdf. Still to do: upload the rebuilt zip, "Submit for Review", and cite the DOI in the paper (deferred with the manuscript tasks). |
+| Dataverse metadata | ✅ | Entered in Dataverse (draft saved and submitted). |
+| **Dataverse dataset created and cited** | 🟡 | Dataset doi:10.7910/DVN/X7CAT0 (JOLE collection); zip uploaded and submitted for review 2026-10-13; DOI in README. Remaining: JOLE data editor's review/publication; cite the DOI in the paper (manuscript tasks); update "Related Publication" once the article DOI exists. |
 | **ICPSR–PSID extract deposited and cited** | ✅ not needed | We use the BPP deposit unchanged (ICPSR 210782 V2, already in the ICPSR–PSID Data Extract Repository) and share no PSID files of our own. Cite `10.3886/E210782V2` + the PSID. Re-check if the acceptance letter or the "Instructions for Authors of Accepts" says otherwise. |
-| Push `jole-final`, tag a release | ⬜ **[YOU]** | Claude does not push. Consider bumping `version` in `pyproject.toml` (and `uv.lock`) before tagging, so the bundle name matches. |
+| Push `jole-final` | ✅ | Pushed 2026-10-13. Optional: tag a release. |
 
 ## Manuscript (Editorial Manager) — deferred
 
