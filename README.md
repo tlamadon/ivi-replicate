@@ -106,8 +106,10 @@ To obtain them:
 2. Download the files from
    <https://www.icpsr.umich.edu/sites/psid/view/studies/210782/versions/V2>
    (the data files are in BPP's package; we use only the three above).
-3. Extract and verify them in one step:
-   `python3 scripts/extract_icpsr_inputs.py PATH/TO/the-downloaded.zip`
+3. Extract and verify them in one step (the V2 download is named
+   `ICPSR_210782-V2.1.zip`; `tax9192.dta` and `natpr.dta` sit in a nested
+   `DATA_replication.zip`, which the script handles):
+   `python3 scripts/extract_icpsr_inputs.py PATH/TO/ICPSR_210782-V2.1.zip`
    writes the three files to `data/raw/` and checks their checksums.
    (Alternatively, place them in `data/raw/` yourself, or set `BPP_EXT` to
    their directory.)

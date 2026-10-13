@@ -19,7 +19,7 @@ Legend: ✅ done · 🟡 prepared, needs a step from you · ⬜ not started ·
 | README (SSDE template), Markdown + PDF | ✅ | `README.md`, `README.pdf` (`scripts/readme_pdf.sh`). |
 | LICENSE | ✅ | MIT License for the whole package (decided 2026-10-13). |
 | ICPSR 210782 reference | ✅ | Checked 2026-10-13 against the DOI registry: V2 (issued 2025) is the latest version; DOI 10.3886/E210782V2 resolves to the ICPSR–PSID Data Extract Repository (landing page OK); citation year 2025. |
-| ICPSR 210782 download matches the package | 🟡 **[YOU]** | Download V2, unzip, then `sha256sum data.dta tax9192.dta natpr.dta` and compare with `data/raw/README.md`. Claude cannot do this (login + PSID data). |
+| ICPSR 210782 download matches the package | ✅ | Verified 2026-10-13 with `scripts/extract_icpsr_inputs.py`: the V2 download (`ICPSR_210782-V2.1.zip`) gives all three files with the expected SHA-256. |
 | PSID citation year | 🟡 **[YOU]** | Fill `[YEAR-OF-DOWNLOAD-PLACEHOLDER]` in README References. |
 | Full run from a clean clone | ⬜ **[YOU]** | `./run_all.sh` on a machine with the data; check that `verify-data` passes and `compare` is clean. Optional, since the 2026-10-05 run already exists. |
 | Dataverse bundle built and verified | ✅ | `scripts/make_dataverse_bundle.sh` → `dist/ivi-replicate-<version>.zip` + `dist/MANIFEST.txt`. Rebuild after the last commit. |
