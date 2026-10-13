@@ -157,8 +157,7 @@ layer 3  bundles + sample statistics -> LaTeX fragments -> PDFs and journal EPS 
 For layer 1, `scripts/psid_bpp_build.py` ports BPP's `adjust_AER.do`, the
 PSID part of `impute_AER.do`, and the income definition in `mindist_AER.do`
 to Python. `scripts/psid_bpp_selection_table.py` computes the sample
-statistics, and `scripts/psid_bpp_table1_check.py` provides an additional
-console check against BPP's Table 1.
+statistics, including the comparison with BPP's Table 1.
 
 For layer 2, the experiment scripts write per-cell results, and aggregators
 and exporters assemble the bundles. Each task's settings match the cluster

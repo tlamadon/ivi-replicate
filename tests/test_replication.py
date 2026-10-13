@@ -84,8 +84,6 @@ def test_experiment_imports(script):
            "METHOD": "vi", "BPP_EXT": "/nonexistent"}
     r = subprocess.run([sys.executable, "-c", f"import {mod}"], cwd=REPO, env=env,
                        capture_output=True, text=True, timeout=300)
-    if r.returncode != 0 and "FileNotFoundError" in r.stderr and mod == "psid_bpp_table1_check":
-        pytest.skip("table-1 check runs on import and needs the ICPSR files")
     assert r.returncode == 0, r.stderr[-2000:]
 
 
