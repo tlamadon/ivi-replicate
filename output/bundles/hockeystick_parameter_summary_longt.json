@@ -1,8 +1,6 @@
 {
   "metadata": {
     "title": "simulation-hockeystick: fitted parameter export",
-    "dgp_spec": "specs/compute-simulation-hockeystick.md",
-    "models_spec": "specs/models.md",
     "source_dir": "results/_simulation_hockeystick_t40_ivi_sweep",
     "panel": {
       "N": 30000,
@@ -227,7 +225,7 @@
       "n_epochs_vi_obs": 20000,
       "n_epochs_mle": null,
       "source_file": "results/_simulation_hockeystick_t40_ivi_sweep/picard_cold_alpha0.60_ep16000_lr1e-2_crn_sig0--1.80_T40.json",
-      "theta_role": "theta_VI_obs (Picard IVI cell Phase 1 fit, synthesized as the VI-only joint-normal estimator per spec)",
+      "theta_role": "theta_VI_obs (Picard IVI cell Phase 1 fit, synthesized as the VI-only joint-normal estimator)",
       "free_keys": [
         "alpha0",
         "log_alpha1",

@@ -78,7 +78,6 @@ def main():
             "n_cells": len(cells),
         },
         "dgp": cfg["dgp"],
-        "spec": "specs/compute-simulation-hockeystick.md",
         "truth": first["truth"],
         "convergence_criterion": {
             "definition": CRITERION_DEFINITION,

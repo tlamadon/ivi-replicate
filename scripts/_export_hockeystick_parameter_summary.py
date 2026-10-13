@@ -13,8 +13,7 @@ combined JSON to the same folder containing, for each cell:
   - the L2 distance to truth on the relevant free coordinates,
   - the bound diagnostics (ELBO / IWAE / SMC at vi / ivi / truth +
     prior_log_p_* for the misspec baseline),
-  - a `shipping` flag distinguishing the five canonical cells (per
-    `specs/compute-simulation-hockeystick.md` Entry section) from the
+  - a `shipping` flag distinguishing the five canonical cells from the
     historical Anderson and pre-rename `vi_*` cells that remain on
     disk.
 
@@ -35,8 +34,7 @@ from collections import OrderedDict
 from typing import Any, Dict, List, Optional
 
 # Canonical ordering matches the 13-key parameter vector that every
-# hockeystick cell emits (see specs/compute-simulation-hockeystick.md
-# Layer 1 step 6 "schema invariant").
+# hockeystick cell emits.
 PARAM_NAMES: List[str] = [
     'alpha0', 'log_alpha1',
     'mu0', 'mu1', 'mu2',
@@ -78,7 +76,7 @@ SHIPPING_STEMS = (
 )
 
 # Stem of the Picard IVI cell. Its Phase 1 is by construction a
-# cold-start JN h=64 VI fit on y_obs; per spec the aggregator
+# cold-start JN h=64 VI fit on y_obs; the aggregator
 # synthesizes a VI-only joint-normal fits[] entry from this cell's
 # `theta_VI_obs` to expose the JN VI estimator as a first-class row.
 PICARD_IVI_CELL_STEM = 'picard_cold_alpha'
@@ -326,8 +324,7 @@ def _synthesize_vi_only_jn_entry(
 ) -> Optional[Dict[str, Any]]:
     """Build the synthesized VI-only joint-normal fits[] entry.
 
-    Per `specs/compute-simulation-hockeystick.md` § "Aggregate parameter
-    summary" → "Synthesized VI-only JN entry": extract `theta_VI_obs` from
+    Extract `theta_VI_obs` from
     the Picard IVI cell's JSON (its Phase 1 fit, which is a cold-start JN
     h=64 VI fit on y_obs) and emit it as a sixth shipping fits[] row
     labelled "VI (joint-normal)". Inherits *_at_vi and smc_log_p_at_truth
@@ -382,7 +379,7 @@ def _synthesize_vi_only_jn_entry(
     entry['source_file'] = os.path.relpath(picard_path)
     entry['theta_role'] = (
         'theta_VI_obs (Picard IVI cell Phase 1 fit, synthesized as the '
-        'VI-only joint-normal estimator per spec)'
+        'VI-only joint-normal estimator)'
     )
     entry['free_keys'] = FREE_KEYS_IVI
     entry['parameters'] = canonical_fit
@@ -497,8 +494,6 @@ def main() -> None:
     out: Dict[str, Any] = OrderedDict()
     out['metadata'] = OrderedDict([
         ('title', 'simulation-hockeystick: fitted parameter export'),
-        ('dgp_spec', 'specs/compute-simulation-hockeystick.md'),
-        ('models_spec', 'specs/models.md'),
         ('source_dir', SOURCE_DIR),
         ('panel', OrderedDict([('N', panel_N), ('T', panel_T),
                                 ('obs_seed', panel_obs_seed),
@@ -545,8 +540,7 @@ def main() -> None:
         l2s = f'{l2:+.4f}' if isinstance(l2, float) else 'n/a'
         tag = '*' if e['shipping'] else ' '
         print(f'  {tag} {e["label"]:55} L2={l2s}')
-    print('  (* = shipping per specs/compute-simulation-hockeystick.md '
-          'Entry section)')
+    print('  (* = shipping cell)')
 
 
 if __name__ == '__main__':

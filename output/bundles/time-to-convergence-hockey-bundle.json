@@ -9,7 +9,6 @@
     "n_cells": 16
   },
   "dgp": "hockeystick",
-  "spec": "specs/compute-simulation-hockeystick.md",
   "truth": {
     "alpha0": -0.25,
     "log_alpha1": -2.3025850929940455,

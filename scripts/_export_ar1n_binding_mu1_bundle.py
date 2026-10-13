@@ -203,7 +203,6 @@ def main() -> None:
     out['metadata'] = OrderedDict([
         ('title', 'simulation-ar1n: Layer 1d mu_1 binding-function '
                   'post-step (bundle)'),
-        ('dgp_spec', 'specs/compute-simulation-ar1n.md'),
         ('source_file', SOURCE_PATH),
         ('upstream_sweep_file', src['config'].get('upstream')),
         ('panel', OrderedDict([

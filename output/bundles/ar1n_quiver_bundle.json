@@ -1,7 +1,6 @@
 {
   "metadata": {
     "title": "simulation-ar1n: Layer 1c (mu_1, log_sigma_eps) Picard quiver post-step for the mean-field IVI (bundle)",
-    "dgp_spec": "specs/compute-simulation-ar1n.md",
     "source_file": "results/_simulation_ar1n_quiver/quiver.json",
     "upstream_sweep_file": "results/_simulation_ar1n_sweep/picard_meanfield_alpha0.60_ep8000_lr1e-2_crn.json",
     "panel": {

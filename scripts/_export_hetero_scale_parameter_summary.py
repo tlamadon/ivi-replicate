@@ -28,7 +28,7 @@ from typing import Any, Dict, List, Optional
 
 
 # Canonical 12-tuple. `z1_skew` is pinned at 0 in the estimator
-# (per specs/compute-simulation-hetero-scale.md) and is NOT part of
+# and is NOT part of
 # the parameter vector. The emission has no `log_sigma_eps`: the
 # per-individual residual log-scale is the extra latent `alpha_i`.
 PARAM_NAMES: List[str] = [
@@ -57,7 +57,7 @@ MISSPEC_ABSENT_KEYS: List[str] = [
     'log_beta', 'beta_a0', 'beta_a1', 'log_sigma_a_cond',
 ]
 
-# Filenames the spec declares for the six canonical cells.
+# Filenames of the six canonical cells.
 CANONICAL_FILES: List[str] = [
     'picard_cold_alpha0.60_ep16000_lr1e-2_crn_rho0.30.json',
     'anderson_alpha0.60_m4_ep16000_lr1e-2_crn_rho0.30.json',
@@ -107,7 +107,7 @@ from those parameters to the generative model is:
     alpha_i | z_{i,1} ~ Normal( beta_a0 + beta_a1 * z_{i,1},
                                  exp(log_sigma_a_cond)^2 ).
     These three coefficients are the conditional-law parameters.
-    Under the spec's marginal-preserving reparametrisation,
+    Under the marginal-preserving reparametrisation,
         beta_a0      = mu_alpha_marg,
         beta_a1      = rho * sigma_alpha_marg / sigma_z1,
         sigma_a_cond = sigma_alpha_marg * sqrt(1 - rho^2),
@@ -131,8 +131,7 @@ The 12 free coordinates under Model A (every IVI and VI-only fit) are
      z1_log_std, z1_log_tail,
      log_beta, beta_a0, beta_a1, log_sigma_a_cond}.
 
-The misspecification baseline (Model B in
-`specs/compute-simulation-hetero-scale.md`, `mle_direct` with
+The misspecification baseline (Model B, `mle_direct` with
 `EMISSION=degenerate`) drops the four emission/extra-hetero
 parameters (log_beta, beta_a0, beta_a1, log_sigma_a_cond) because
 the inference model has no decoder and no alpha latent --- the
@@ -411,8 +410,7 @@ def main() -> None:
     # ------------------------------------------------------------------
     # Lifted seventh row: VI-only joint-normal Phase-1 reference.
     #
-    # Per specs/compute-simulation-hetero-scale.md, the summary must
-    # expose the Phase-1 VI MAP under the joint-normal-extra encoder
+    # The summary must expose the Phase-1 VI MAP under the joint-normal-extra encoder
     # (the starting point of every IVI cell) as a standalone fit row.
     # Source: picard_cold_alpha0.60_* by convention; the IVI cells'
     # theta_VI_obs agree to 1e-6 across cells so the choice does not
@@ -489,8 +487,6 @@ def main() -> None:
     out: Dict[str, Any] = OrderedDict()
     out['metadata'] = OrderedDict([
         ('title', 'simulation-hetero-scale: fitted parameter export'),
-        ('dgp_spec', 'specs/compute-simulation-hetero-scale.md'),
-        ('models_spec', 'specs/models.md'),
         ('source_dir', SOURCE_DIR),
         ('panel', OrderedDict([('N', 30000), ('T', 6),
                                 ('obs_seed', 11)])),

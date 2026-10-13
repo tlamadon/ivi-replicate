@@ -1,7 +1,6 @@
 {
   "metadata": {
     "title": "simulation-ar1n: Layer 1d mu_1 binding-function post-step (bundle)",
-    "dgp_spec": "specs/compute-simulation-ar1n.md",
     "source_file": "results/_simulation_ar1n_binding_mu1/binding_mu1.json",
     "upstream_sweep_file": "results/_simulation_ar1n_sweep/picard_meanfield_alpha0.60_ep8000_lr1e-2_crn.json",
     "panel": {

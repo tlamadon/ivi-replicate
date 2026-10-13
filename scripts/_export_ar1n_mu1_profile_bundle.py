@@ -202,7 +202,6 @@ def main() -> None:
     out['metadata'] = OrderedDict([
         ('title', 'simulation-ar1n: Layer 1b ELBO + log-p profile '
                   'along the truth<->VI line (bundle)'),
-        ('dgp_spec', 'specs/compute-simulation-ar1n.md'),
         ('source_file', SOURCE_PATH),
         ('upstream_sweep_file', src['config'].get('upstream')),
         ('panel', OrderedDict([

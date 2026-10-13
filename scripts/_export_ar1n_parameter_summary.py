@@ -86,7 +86,7 @@ The mapping from those parameters to the generative model is:
 
 The 8 free coordinates under Model A (used by every VI and IVI fit) are
     {mu0, mu1, mu2, sigma0, sigma1, sigma2, z1_log_std, log_sigma_eps}.
-The MLE no-error fit (Model B in `specs/compute-simulation-ar1n.md`)
+The MLE no-error fit (Model B)
 drops log_sigma_eps and keeps only the 7 free prior coordinates --- the
 emission collapses to y_t = z_t exactly (no measurement error).
 
@@ -314,8 +314,6 @@ def main() -> None:
     out: Dict[str, Any] = OrderedDict()
     out['metadata'] = OrderedDict([
         ('title', 'simulation-ar1n: fitted parameter export'),
-        ('dgp_spec', 'specs/compute-simulation-ar1n.md'),
-        ('models_spec', 'specs/models.md'),
         ('source_dir', SOURCE_DIR),
         ('panel', OrderedDict([('N', 30000), ('T', 6),
                                 ('obs_seed', 11)])),
