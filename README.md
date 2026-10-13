@@ -4,240 +4,211 @@
 [![Release](https://img.shields.io/github/v/release/tlamadon/ivi-replicate)](https://github.com/tlamadon/ivi-replicate/releases/latest)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tlamadon/ivi-replicate/blob/main/notebooks/table2_vi_gaussian.ipynb)
 
-This package contains the code and published results used to reproduce the
-estimates, figures and tables of *Indirect Variational Inference: Applications
-to Earnings Dynamics* by Neele Balke, Stephane Bonhomme and Thibaut Lamadon
-([arXiv:2607.15168](https://arxiv.org/abs/2607.15168)). You can rebuild all
-figures and tables from the included results without running the estimations
-or obtaining the external data.
+**Contents:**
+[Overview](#overview) ·
+[Data availability](#data-availability-and-provenance-statements) ·
+[Dataset list](#dataset-list) ·
+[Computational requirements](#computational-requirements) ·
+[Programs](#description-of-programs) ·
+[Instructions](#instructions-to-replicators) ·
+[Tables and figures](#list-of-tables-figures-and-programs) ·
+[References](#references) ·
+[File inventory](#appendix-a-file-inventory) ·
+[Pipeline management](#appendix-b-pipeline-management)
 
-This README explains how to get started, how the code is organized, and what
-the pipeline produces, including measured run times. The final section covers
-data provenance, seeds, execution with scripthut, and other reproducibility
-details.
+## Overview
 
-**Table of contents**
+This package reproduces every estimate, figure and table of *Indirect
+Variational Inference: Applications to Earnings Dynamics* by Neele Balke,
+Stéphane Bonhomme and Thibaut Lamadon (Journal of Labor Economics;
+[arXiv:2607.15168](https://arxiv.org/abs/2607.15168)). The code is in Python
+(PyTorch for estimation, numpy and Tectonic for figures and tables).
 
-1. [How to run the replication](#1-how-to-run-the-replication)
-2. [How the code is organized](#2-how-the-code-is-organized)
-3. [What the package generates](#3-what-the-package-generates)
-4. [Reproducibility and pipeline management](#4-reproducibility-and-pipeline-management)
+The paper has two parts:
 
-## 1. How to run the replication
+- **Monte Carlo simulations** (Tables 1–3, Figures 1–8, web-appendix Tables
+  E1 and F1). These need no external data.
+- **An application to PSID earnings** (Table 4, Figures 9–12, Appendix
+  Table B1, web-appendix Table H1). It uses the PSID household panel prepared
+  by Blundell, Pistaferri and Preston (2008), which replicators download
+  themselves from the ICPSR–PSID Data Extract Repository (ICPSR 210782).
+  This package contains no PSID data.
 
-### Set up the requirements
+The pipeline has three layers, all driven by `replicate.py` (or by the
+one-command wrapper `run_all.sh`):
 
-Use Linux x86-64 with git and about 6 GB of free disk space. Install
-[mise](https://mise.jdx.dev) to obtain the pinned versions of
-[uv](https://docs.astral.sh/uv/) (0.12.0) and
-[Tectonic](https://tectonic-typesetting.github.io) (0.17.0). For the journal
-EPS files, also install [Ghostscript](https://www.ghostscript.com) ≥ 10
-(`gs` on `PATH`, e.g. `sudo apt install ghostscript` on Ubuntu/Debian).
-From the repository root, run:
-
-```bash
-mise install                # install uv and Tectonic from mise.toml
-mise run setup              # install Python 3.12 and pinned packages from uv.lock
-mise run test               # consistency checks (~1 min)
-```
-
-Without mise, install uv and Tectonic yourself and run `uv sync --frozen`
-and `uv run pytest`. Internet access is needed for setup and Tectonic's first
-run. No Stata, R, MATLAB or full TeX distribution is needed; see
-[environment details](#environment-details) for NixOS setup.
-
-### Rebuild the figures and tables
-
-```bash
-uv run python replicate.py run --layer 3 --force    # also available as: mise run figures
-```
-
-This uses the included results and writes `output/figures/figures.pdf`,
-individual PDFs, LaTeX fragments and journal EPS files. It takes about two
-minutes on a laptop and needs neither a GPU nor the external data.
-
-The same build runs on GitHub Actions (`.github/workflows/release.yml`):
-pushing a tag `v<version>` matching `version` in `pyproject.toml` attaches
-`figures.pdf` to a GitHub release of that name.
-
-### Try one estimation in Colab
-
-[`notebooks/table2_vi_gaussian.ipynb`](notebooks/table2_vi_gaussian.ipynb)
-([open in Colab](https://colab.research.google.com/github/tlamadon/ivi-replicate/blob/main/notebooks/table2_vi_gaussian.ipynb))
-reruns one line of Table 2 on a Colab GPU: the $T=6$ unrestricted Gaussian VI
-fit, with the settings and seeds of `replicate.py`, and compares it with the
-published estimates.
-
-### Rerun the estimations
-
-For the empirical results, obtain `data.dta`, `tax9192.dta` and `natpr.dta`
-from the Blundell, Pistaferri and Preston (2008) replication package, ICPSR
-study 210782. Put them in `data/raw/`, or set `BPP_EXT` to their directory.
-See [data provenance and checksums](#data-provenance-and-checksums) for details.
-Estimation needs an NVIDIA GPU with at least 4 GB of memory, a CUDA 13
-compatible driver (≥ 580), and 16 GB of RAM.
-
-```bash
-uv run python replicate.py run --layer 1           # build the PSID matrix and sample statistics
-uv run python replicate.py run --layer 2           # regenerate the estimation and simulation results
-uv run python replicate.py run --layer 3 --force   # rebuild figures and tables from those results
-```
-
-The simulation blocks need no external data; for example, run just one with
-`uv run python replicate.py run --layer 2 --block hetero`. The default run
-uses the included bootstrap results; add `--with-bootstrap` to layer 2 to
-regenerate them. See [run times](#run-times) before starting a full run, and
-[local execution](#local-execution-and-smoke-tests) or
-[cluster execution](#cluster-execution-with-scripthut) for more options.
-
-## 2. How the code is organized
-
-The pipeline has three layers. A *bundle* is a JSON file containing the
-estimates or simulation results needed by one or more figures and tables.
-Keeping these results separate from the figure generators lets you rebuild
-the paper's artifacts from either the published or regenerated estimates.
-
-| Layer | Purpose | Output directory |
-|---|---|---|
-| 1: data | Build the PSID/BPP earnings matrix and sample statistics from the ICPSR files | `output/data/` |
-| 2: bundles | Run estimations and simulations, then collect their results into bundles | `output/bundles/` |
-| 3: figures | Generate figures and tables from the bundles | `output/figures/` |
-
-### Repository layout
-
-```text
-replicate.py       pipeline tasks, settings, seeds, dependencies, resources, figure registry
-scripts/           entry points and helpers
-  psid_bpp_*.py      layer 1: data matrix and sample statistics
-  _simulation_*, bpp_*, _export_*, ...   layer 2: fits, aggregators, bundle exporters
-  fig_*.py           layer 3: figure/table generators, compilation and EPS export
-  fig_preamble.tex   shared LaTeX preamble
-mlye/              estimation library (encoders, decoders, priors, FullModel, SMC/FIVO)
-notebooks/         Colab notebook rerunning one Table 2 estimation
-tests/             consistency checks (DAG, imports, seeding, environment pins, figure registry)
-workflows/         generated scripthut workflows for layers 1–2
-mise.toml          tool versions and shortcut tasks
-pyproject.toml     Python project and dependencies
-uv.lock            pinned Python environment (requirements.lock has the same pins for pip)
-scripthut.yaml     cluster environment and backend configuration
-output/
-  data/              earnings matrix and sample statistics
-  bundles/           estimation and simulation bundles
-    cells/             intermediate results and bootstrap aggregates
-  figures/           tex/ fragments, pdf/ pages, eps/ journal files, figures.pdf
-  manifests/         one provenance JSON per task
-  logs/              one log per task
-  PROVENANCE.json    combined provenance record, written by replicate.py collect
-```
-
-`replicate.py` is the source of truth for what runs. Change task settings
-there, then regenerate cluster workflows with `uv run python replicate.py hut`
-if layers 1–2 change. `uv run python replicate.py list` prints every task's
-layer, script, resources and dependencies.
-
-### Pipeline blocks and scripts
-
-Layers 1–2 contain five estimation/simulation blocks (`ar1n`, `hetero`,
-`hockey`, `timing`, `bpp`), each with a corresponding scripthut workflow.
-The `bpp` block includes the data-matrix task. A separate local `data` block
-computes sample statistics. Layer 3 is the local `figures` block: 20
-figure/table generators, followed by PDF compilation and EPS export.
-
-```text
-layer 1  ICPSR files -> earnings matrix + sample statistics
-layer 2  ar1n    AR(1)+Normal fits -> parameter summary, profile, binding function, quiver
-         hetero  hetero-scale fits -> parameter summary
-         hockey  T=6 and T=40 fits -> parameter summaries, posterior contour
-         timing  convergence experiments -> timing bundle
-         bpp     PSID matrix -> hetero-scale and hetero-mean fits -> empirical bundles
-                   optional: 2 × 100 bootstrap replicates -> aggregates -> empirical bundles
-layer 3  bundles + sample statistics -> LaTeX fragments -> PDFs and journal EPS files
-```
-
-For layer 1, `scripts/psid_bpp_build.py` ports BPP's `adjust_AER.do`, the
-PSID part of `impute_AER.do`, and the income definition in `mindist_AER.do`
-to Python. `scripts/psid_bpp_selection_table.py` computes the sample
-statistics, including the comparison with BPP's Table 1.
-
-For layer 2, the experiment scripts write per-cell results, and aggregators
-and exporters assemble the bundles. Each task's settings match the cluster
-workflow that produced its published result; the source workflow and commit
-are recorded in the task's `note` and its [provenance manifest](#provenance).
-
-For layer 3, `FIGURES` in `replicate.py` registers each artifact's order,
-paper number, input bundles and arguments. Each `scripts/fig_<name>.py`
-generates one artifact. `scripts/fig_parameter_names.md` maps the parameter
-symbols in the tables to keys in the bundles.
-
-## 3. What the package generates
-
-All pipeline outputs live under `output/`. The published estimation bundles,
-sample statistics and two bootstrap aggregates are included in the
-repository. A new run writes to these same locations; see
-[published outputs and comparisons](#published-outputs-and-comparisons) for
-comparing results or keeping an experimental run in a separate directory.
-
-### Data and estimation bundles
-
-Layer 1 produces `output/data/bpp_y_matrix.npy`, a 741 × 10 earnings matrix,
-and `output/data/bpp_selection_table.json`, the sample statistics. The matrix
-is not distributed because it is derived from licensed data. Layer 2
-produces the following 11 estimation/simulation bundles in `output/bundles/`;
-the last row lists the layer-1 sample statistics.
-
-| Bundle | Block | What it contains | Used in the paper |
+| Layer | What it does | Output | Time |
 |---|---|---|---|
-| `ar1n_parameter_summary.json` | ar1n | AR(1)+Normal simulation: 13 VI / IVI / MLE fits | Table 1 |
-| `ar1n_mu1_profile_bundle.json` | ar1n | ELBO/likelihood profile in μ₁ (20-point grid) | Figure 4 |
-| `ar1n_binding_mu1_bundle.json` | ar1n | IVI binding function in μ₁ (15-point grid) | Figure 5 |
-| `ar1n_quiver_bundle.json` | ar1n | binding-function quiver on the (μ₁, log σ_ε) plane (10×10 grid) | Figure 3 |
-| `hetero_scale_parameter_summary.json` | hetero | hetero-scale simulation (ρ=0.30): 6 fits | Table 3, Figure 8 |
-| `hockeystick_parameter_summary.json` | hockey | hockey-stick simulation, T=6: 11 fits (5 headline + 6 historical) | Table 2, Figure 7 |
-| `hockeystick_parameter_summary_longt.json` | hockey | hockey-stick simulation, T=40 IVI | Table 2 (T=40 panel) |
-| `contour_bundle.json` | hockey | past-two-period imputed-posterior contour | Figure 6 |
-| `time-to-convergence-hockey-bundle.json` | timing | VI vs SMC time to convergence, 4 (N,T) corners × 4 configs | Table E1 (web appendix) |
-| `bundle_psid_heteroscale.json` | bpp | PSID hetero-scale model: VI (3 encoders) + IVI + bootstrap SEs | Table 4, Figures 9–12, Table H1 |
-| `2026-07-13-bpp-hetero-mean-indep-bundle.json` | bpp | PSID hetero-mean-independent model: VI + IVI vs hetero-scale | Table H1 (web appendix) |
-| `bpp_selection_table.json` | data | PSID sample statistics: BPP as published vs our selection vs the balanced panel | Table B1 |
+| 1: data | Builds the PSID earnings matrix and sample statistics from the ICPSR files | `output/data/` | minutes (CPU) |
+| 2: bundles | Runs the estimations and simulations and collects results into JSON *bundles* | `output/bundles/` | ~22 GPU-hours (+ ~210 for the optional bootstrap) |
+| 3: figures | Builds every figure and table from the bundles | `output/figures/` | ~2 minutes (CPU) |
 
-### Figure and table files
+The bundles produced by the authors' run are included, so **layer 3 can be
+run on its own** in about two minutes, without the data and without a GPU,
+to rebuild all figures and tables from the published estimates.
 
-Layer 3 reads the bundles in `output/bundles/` and the sample statistics in
-`output/data/`, using the published versions or the regenerated ones once
-layers 1–2 have run. It produces:
+## Data Availability and Provenance Statements
 
-| Output | Contents |
+### Statement about rights
+
+- [x] I certify that the author(s) of the manuscript have legitimate access to
+  and permission to use the data used in this manuscript.
+- [x] I certify that the author(s) of the manuscript have documented permission
+  to redistribute/publish the data contained within this replication package.
+  The package contains only simulated data, estimation results and aggregate
+  sample statistics; it contains no PSID microdata.
+
+### License for data
+
+The results included in this package (`output/`) are licensed under CC BY 4.0;
+see `LICENSE`. The PSID-derived input files are not part of the package and
+are governed by the ICPSR and PSID terms of use.
+
+### Summary of availability
+
+- [ ] All data **are** publicly available.
+- [x] Some data **cannot be made** publicly available.
+- [ ] **No data can be made** publicly available.
+
+The simulation results use data generated by the code. The empirical
+application uses PSID data that cannot be redistributed, but which any
+researcher can obtain free of charge as described below.
+
+### Details on each data source
+
+| Data source | Files | Provided | Access |
+|---|---|---|---|
+| Blundell, Pistaferri and Preston (2008) PSID extract, ICPSR 210782 V2 | `data.dta`, `tax9192.dta`, `natpr.dta` | No | Free ICPSR account; accept the ICPSR and PSID terms of use |
+| Simulated panels | generated by `scripts/_simulation_*.py`, `_time_to_convergence_hockey.py`, `_contour_past_2period_imputed.py` | Regenerated by the code | – |
+
+**PSID data (Blundell, Pistaferri and Preston 2008).** The empirical
+application starts from the household-year panel that Blundell, Pistaferri
+and Preston (BPP) built from the Panel Study of Income Dynamics (PSID) for
+"Consumption Inequality and Partial Insurance" (American Economic Review,
+2008). Their replication package is deposited in the ICPSR–PSID Data Extract
+Repository as study 210782 (version V2,
+[doi:10.3886/E210782V2](https://doi.org/10.3886/E210782V2)). We use three of
+its files:
+
+| File | Content |
 |---|---|
-| `output/figures/tex/<name>.tex` | LaTeX fragments (pgfplots/TikZ or tables), ready to include in the paper with `\input` |
-| `output/figures/pdf/<name>.pdf` | One page per figure or table |
-| `output/figures/figures.pdf` | All artifacts, with a list of figures and tables on the first page; each artifact is labelled with its paper number, generator and input bundles |
-| `output/figures/eps/<number>_<name>.eps` | Journal EPS files for artifacts outside the web appendix; figures omit captions and notes, tables include them |
+| `data.dta` | BPP's PSID household-year panel, built by their `create1_AER.do` and `create2_AER.do` from the PSID family files (1968–1992) and the 1968–97 cross-year individual file |
+| `tax9192.dta` | TAXSIM federal income taxes for 1991–92 |
+| `natpr.dta` | National price index (`cpi`) |
 
-The `fig-<name>` tasks write the fragments. `fig-compile` uses
-`scripts/fig_compile.py`, the paper's preamble (`scripts/fig_preamble.tex`)
-and Tectonic to build the PDFs. `fig-eps` uses `scripts/fig_eps.py` and
-requires Ghostscript (`gs`); without it EPS export fails, while the PDFs
-are unaffected. Three artifacts have fixed content and read no bundle:
-Figures 1 and 2 and the estimation-settings table (Table F1).
+PSID Conditions of Use prohibit redistributing PSID data, so these files and
+everything derived from them at the individual level (in particular the
+741 × 10 earnings matrix `output/data/bpp_y_matrix.npy`) are not included.
+To obtain them:
 
-Artifacts carry their paper numbers (`number` in the registry; Figure 7 comes
-before Figure 6 in document order, appendix tables are B1, E1, F1, H1), and
-web-appendix items (Tables E1, F1, H1) are marked as such.
+1. Create a free account at ICPSR and register with the PSID, accepting the
+   PSID Conditions of Use.
+2. Download the files from
+   <https://www.icpsr.umich.edu/sites/psid/view/studies/210782/versions/V2>
+   (the data files are in BPP's package; we use only the three above).
+3. Place them in `data/raw/` (or set `BPP_EXT` to their directory).
+4. Check them against these SHA-256 checksums (`sha256sum data/raw/*.dta`):
 
-### Run times
+```text
+c1d1949748e224f03b80803b01ea7775cb043cae1da5e89a8717452591ecfd41  data.dta
+0af8a9b32b1b6d3c3d80e2f0830f662bf82c23f1d51a3c27d601f07efb17af81  tax9192.dta
+7044d5511d7a3caa079688fe3513043907162373403f7dd53bfeaf1fa2a4cd9b  natpr.dta
+```
 
-| Stage | Hardware | Approximate time |
+`scripts/psid_bpp_build.py` ports BPP's
+sample selection (`adjust_AER.do`), the PSID part of `impute_AER.do` and the
+income definition in `mindist_AER.do` to Python, restricts to 1980–1989 and
+the balanced panel, and residualizes log earnings. After layer 1,
+`uv run python replicate.py verify-data` checks that the resulting matrix has
+the expected SHA-256
+(`c9cda89925b3c35ae67ebaac8a3dfb748ac55d76750d609c0879d61555a9ffae`).
+
+Data citations: Blundell, Pistaferri and Preston (2026) for the extract and
+Panel Study of Income Dynamics (2026) for the underlying survey; see
+[References](#references).
+
+## Dataset list
+
+| File | Source | Notes | Provided |
+|---|---|---|---|
+| `data/raw/data.dta` | ICPSR 210782 V2 | PSID household-year panel (BPP) | No |
+| `data/raw/tax9192.dta` | ICPSR 210782 V2 | TAXSIM taxes 1991–92 | No |
+| `data/raw/natpr.dta` | ICPSR 210782 V2 | Price index | No |
+| `output/data/bpp_y_matrix.npy` | layer 1 | Residual log earnings, 741 households × 10 years (PSID microdata) | No |
+| `output/data/bpp_selection_table.json` | layer 1 | Aggregate sample statistics (counts, means, moments) | Yes |
+| `output/bundles/*.json` (11 files) | layer 2 | Estimates, simulation results, bootstrap summaries | Yes |
+| `output/bundles/cells/_bpp_hetero_scale_ivi_bootstrap_k40*/bootstrap_theta.json` | layer 2 | Bootstrap replicates of the parameter vector | Yes |
+
+The included files contain parameter estimates and aggregate statistics only.
+Each bundle is described in [Appendix A](#estimation-bundles).
+
+## Computational requirements
+
+### Software requirements
+
+- Linux x86-64 (tested on NixOS and RHEL 8). Other platforms are untested.
+- [mise](https://mise.jdx.dev), which installs the pinned tools from `mise.toml`:
+  - uv 0.12.0 (Python environment manager)
+  - Tectonic 0.17.0 (self-contained LaTeX engine for layer 3; downloads about
+    50 MB of packages from its versioned TeX bundle on first use)
+- Python 3.12, with all packages pinned in `uv.lock` (`requirements.lock` has
+  the same pins for pip). The main ones:
+  - torch 2.13.0 (with CUDA 13 libraries)
+  - numpy 2.5.2, scipy 1.18.1, pandas 3.0.5, statsmodels 0.14.6, matplotlib 3.11.1
+  - pydantic, structlog, nvidia-ml-py; pytest for the checks
+- Ghostscript ≥ 10, only for the journal EPS files (`gs` on `PATH`).
+- No Stata, R, MATLAB or full TeX distribution is needed.
+
+`mise run setup` (or `uv sync --frozen`) creates the environment, about 5 GB.
+On NixOS, PyTorch needs `/run/opengl-driver/lib` and 64-bit `libstdc++` and
+`libz` on `LD_LIBRARY_PATH`: `nix develop` (from `flake.nix`) supplies the
+driver path and `libstdc++`; also make `libz` available, and set
+`TRITON_LIBCUDA_PATH=/run/opengl-driver/lib`.
+
+### Controlled randomness
+
+- [x] Random seeds are set at the start of every stochastic program.
+
+Every stochastic entry point calls `mlye.seeding.seed_everything` before any
+draw (`tests/test_replication.py` enforces this). It seeds Python, numpy and
+torch (CPU and CUDA), turns on `torch.use_deterministic_algorithms`, disables
+cuDNN benchmarking and sets `CUBLAS_WORKSPACE_CONFIG`. Each script then uses
+explicit seeds, all passed by `replicate.py`, which also sets
+`PYTHONHASHSEED=0`:
+
+- simulated panel: `OBS_SEED=11`
+- common-random-number draws: `NOISE_SEED=12345`
+- encoder initialization: `VI_SEED=11007`; NaN-retry sequence `VI_SEED + i`
+- PSID fits: `*_SEED=11`
+- bootstrap: household resample seed `31000+b`; the unconditional bootstrap
+  also uses `SEED=5000+b` and `NOISE_SEED=900000+b`
+
+Rerunning on the same GPU model, driver and torch build gives bitwise-identical
+outputs. Across GPU models (the original runs used H100 and L40S GPUs),
+floating-point reduction order differs, so results agree to optimization
+precision. `replicate.py compare` quantifies the differences. The wall-clock
+times in Table E1 depend on the hardware.
+
+### Memory, runtime and storage requirements
+
+| Stage | Hardware | Time measured in the authors' run |
 |---|---|---|
-| Data preparation | CPU | Minutes |
-| Estimations and simulations | H100/L40S GPUs | 22 GPU-hours in the replication run; allow about 1–2 days sequentially on one GPU |
-| Optional bootstrap | H100 GPUs | An additional 210 GPU-hours for 200 replicates |
-| Figures and tables | CPU/laptop | About 2 minutes |
+| Layer 1: data | CPU | Minutes |
+| Layer 2: estimations and simulations | NVIDIA H100 / L40S GPUs | 22 GPU-hours in total (14.5 h H100, 7.7 h L40S); allow 1–2 days sequentially on one GPU |
+| Optional bootstrap (2 × 100 IVI replicates) | NVIDIA H100 | About 210 GPU-hours (estimate) |
+| Layer 3: figures and tables | CPU / laptop | About 2 minutes |
 
-The longest estimation task, hockey-stick T=40, took 10.5 hours on an H100;
-measured peak GPU memory was 2.3 GB. Scripts fall back to the CPU when no GPU
-is present, but layer 2 is then impractically slow. Slurm time limits add up
-to about 200 hours; these are scheduling limits, not measured compute time.
-The run summary below reports actual wall-clock time by block and bundle.
+- **GPU:** NVIDIA GPU with at least 4 GB of memory and a CUDA 13 compatible
+  driver (≥ 580). Measured peak GPU memory was 2.3 GB. Scripts fall back to
+  the CPU, but layer 2 is then impractically slow.
+- **Memory:** 16 GB of RAM (cluster jobs requested 32 GB).
+- **Storage:** about 6 GB (5 GB for the Python environment).
+- **Authors' hardware:** the `pythia` Slurm cluster (NVIDIA H100 and L40S
+  nodes, RHEL 8) for layers 1–2; a NixOS workstation (NVIDIA RTX 5090) and
+  GitHub Actions (`ubuntu-latest`) for layer 3.
+
+The longest task, the T = 40 hockey-stick IVI fit, took 10.5 hours on an
+H100. The run summary below is generated from the run's provenance manifests.
 
 <!-- run-summary:begin (generated by `python replicate.py summary --readme`) -->
 
@@ -399,7 +370,256 @@ The bootstrap quantities come from the shipped `output/bundles/cells/_bpp_hetero
 
 <!-- run-summary:end -->
 
-## 4. Reproducibility and pipeline management
+## Description of programs
+
+| Path | Purpose |
+|---|---|
+| `run_all.sh` | One-command replication (layers 1 → 2 → 3, data check, comparison with the published bundles) |
+| `replicate.py` | Single source of truth for the pipeline: every task, its layer, settings, seeds, dependencies and resources, and the registry of figures and tables (`FIGURES`) |
+| `scripts/psid_bpp_*.py` | Layer 1: PSID earnings matrix and sample statistics |
+| `scripts/bpp_*.py` | Layer 2: estimations on the PSID |
+| `scripts/_simulation_*.py`, `_time_to_convergence_hockey.py`, `_contour_*.py` | Layer 2: simulation experiments |
+| `scripts/_export_*.py`, `*_aggregate.py`, `bpp_hetero_scale_bundle.py` | Layer 2: assemble the bundles |
+| `scripts/fig_*.py` | Layer 3: one generator per figure or table, plus compilation (`fig_compile.py`) and EPS export (`fig_eps.py`) |
+| `mlye/` | Estimation library: encoders, decoders, priors, the full VI model, SMC and FIVO |
+| `tests/` | Consistency checks (pipeline graph, imports, seeding, environment pins, figure registry) |
+
+Every file is listed in [Appendix A](#appendix-a-file-inventory). Code
+comments sometimes cite internal design notes (`specs/…`, `journal/…`) from
+the authors' development repository; these notes are not part of the package
+and are not needed to run it.
+
+### License for code
+
+The code is licensed under the MIT License; see `LICENSE`.
+
+## Instructions to replicators
+
+1. **Install the tools.** On Linux x86-64 with git, install
+   [mise](https://mise.jdx.dev), then from the package root run:
+
+   ```bash
+   mise install       # uv 0.12.0 and Tectonic 0.17.0
+   mise run setup     # Python 3.12 + pinned packages (uv sync --frozen)
+   mise run test      # consistency checks, about 1 minute
+   ```
+
+   Without mise, install uv and Tectonic yourself and run `uv sync --frozen`
+   and `uv run pytest`. Internet access is needed for this step.
+
+2. **Rebuild the figures and tables from the published estimates** (no data,
+   no GPU, about 2 minutes):
+
+   ```bash
+   ./run_all.sh --figures-only
+   ```
+
+   This writes `output/figures/figures.pdf` (all figures and tables, labelled
+   with their paper numbers), one PDF and one LaTeX fragment per item, and
+   journal EPS files.
+
+3. **Obtain the PSID data** as described in
+   [Details on each data source](#details-on-each-data-source) and put the
+   three files in `data/raw/`.
+
+4. **Run the full replication:**
+
+   ```bash
+   ./run_all.sh                    # layers 1-3, using the published bootstrap
+   ./run_all.sh --with-bootstrap   # also rerun the 2 x 100 bootstrap
+   ```
+
+   `run_all.sh` builds the data (layer 1), checks the earnings matrix
+   checksum, reruns every estimation and simulation (layer 2), rebuilds the
+   figures and tables from the new bundles (layer 3), and compares the new
+   bundles with the published ones. Regenerating overwrites the files in
+   `output/`; `git restore output/` brings back the published versions.
+
+### Details
+
+- **Partial runs.** `uv run python replicate.py run --layer 2 --block hetero`
+  runs one block; `--only 'ar1n-sweep-*'` selects tasks by id;
+  `--workdir DIR` writes to a separate tree; `uv run python replicate.py list`
+  prints every task. The simulation blocks (`ar1n`, `hetero`, `hockey`,
+  `timing`) need no data.
+- **Bootstrap.** By default, the PSID standard errors and the confidence band
+  in Figure 9 use the included bootstrap results
+  (`output/bundles/cells/_bpp_hetero_scale_ivi_bootstrap_k40*/`). Add
+  `--with-bootstrap` to recompute them.
+- **Smoke test.** `uv run python replicate.py run --smoke --layer 1,2
+  --workdir /tmp/smoke` runs every task with tiny settings in minutes. It
+  checks the code paths, not the results.
+- **Colab.** [`notebooks/table2_vi_gaussian.ipynb`](notebooks/table2_vi_gaussian.ipynb)
+  reruns one line of Table 2 (the T = 6 unrestricted Gaussian VI fit) on a
+  Colab GPU and compares it with the published estimates.
+- **Cluster.** The authors ran layers 1–2 on a Slurm cluster through
+  [scripthut](https://github.com/tlamadon/scripthut); see
+  [Appendix B](#appendix-b-pipeline-management).
+
+## List of tables, figures and programs
+
+The provided code reproduces:
+
+- [ ] All numbers provided in text in the paper (not yet checked against the final text)
+- [x] All tables and figures in the paper
+
+Each item is generated by `scripts/fig_<name>.py` into
+`output/figures/tex/<name>.tex` (LaTeX fragment), compiled to
+`output/figures/pdf/<name>.pdf`; paper items are also exported to
+`output/figures/eps/<number>_<name>.eps`. All are collected in
+`output/figures/figures.pdf`.
+
+| Figure/Table | Program | Output file (`output/figures/…`) | Input bundle(s) |
+|---|---|---|---|
+| Figure 1 | `scripts/fig_sample_vs_population.py` | `pdf/sample_vs_population.pdf`, `eps/fig1_sample_vs_population.eps` | fixed content |
+| Figure 2 | `scripts/fig_ivi_binding_function.py` | `pdf/ivi_binding_function.pdf`, `eps/fig2_ivi_binding_function.eps` | fixed content |
+| Table 1 | `scripts/fig_ar1n_parameter_table.py` | `pdf/ar1n_parameter_table.pdf`, `eps/tab1_ar1n_parameter_table.eps` | `ar1n_parameter_summary.json` |
+| Figure 3 | `scripts/fig_ar1n_trajectory_fixed_point.py` | `pdf/ar1n_trajectory_fixed_point.pdf`, `eps/fig3_ar1n_trajectory_fixed_point.eps` | `ar1n_quiver_bundle.json` |
+| Figure 4 | `scripts/fig_ar1n_likelihood_elbo.py` | `pdf/ar1n_likelihood_elbo.pdf`, `eps/fig4_ar1n_likelihood_elbo.eps` | `ar1n_mu1_profile_bundle.json` |
+| Figure 5 | `scripts/fig_ar1n_binding_function.py` | `pdf/ar1n_binding_function.pdf`, `eps/fig5_ar1n_binding_function.eps` | `ar1n_binding_mu1_bundle.json` |
+| Table 2 | `scripts/fig_hockeystick_parameter_table.py` | `pdf/hockeystick_parameter_table.pdf`, `eps/tab2_hockeystick_parameter_table.eps` | `hockeystick_parameter_summary.json`, `hockeystick_parameter_summary_longt.json` |
+| Figure 6 | `scripts/fig_hockeystick_posteriors.py` | `pdf/hockeystick_posteriors.pdf`, `eps/fig6_hockeystick_posteriors.eps` | `contour_bundle.json` |
+| Figure 7 | `scripts/fig_hockeystick_mu_sigma_z1_e.py` | `pdf/hockeystick_mu_sigma_z1_e.pdf`, `eps/fig7_hockeystick_mu_sigma_z1_e.eps` | `hockeystick_parameter_summary.json` |
+| Table 3 | `scripts/fig_hetero_scale_parameter_table.py` | `pdf/hetero_scale_parameter_table.pdf`, `eps/tab3_hetero_scale_parameter_table.eps` | `hetero_scale_parameter_summary.json` |
+| Figure 8 | `scripts/fig_hetero_scale_a_sigma_z1_e.py` | `pdf/hetero_scale_a_sigma_z1_e.pdf`, `eps/fig8_hetero_scale_a_sigma_z1_e.eps` | `hetero_scale_parameter_summary.json` |
+| Table 4 | `scripts/fig_psid_parameter_table.py` | `pdf/psid_parameter_table.pdf`, `eps/tab4_psid_parameter_table.eps` | `bundle_psid_heteroscale.json` |
+| Figure 9 | `scripts/fig_psid_a_sigma_z1_eps.py` | `pdf/psid_a_sigma_z1_eps.pdf`, `eps/fig9_psid_a_sigma_z1_eps.eps` | `bundle_psid_heteroscale.json` |
+| Figure 10 | `scripts/fig_psid_persistence_residual.py` | `pdf/psid_persistence_residual.pdf`, `eps/fig10_psid_persistence_residual.eps` | `bundle_psid_heteroscale.json` |
+| Figure 11 | `scripts/fig_psid_mixture_density.py` | `pdf/psid_mixture_density.pdf`, `eps/fig11_psid_mixture_density.eps` | `bundle_psid_heteroscale.json` |
+| Figure 12 | `scripts/fig_psid_ce_risk_premium.py` | `pdf/psid_ce_risk_premium.pdf`, `eps/fig12_psid_ce_risk_premium.eps` | `bundle_psid_heteroscale.json` |
+| Table B1 (appendix) | `scripts/fig_psid_sample_table.py` | `pdf/psid_sample_table.pdf`, `eps/tabB1_psid_sample_table.eps` | `bpp_selection_table.json` |
+| Table E1 (web appendix) | `scripts/fig_hockeystick_resource_table.py` | `pdf/hockeystick_resource_table.pdf` | `time-to-convergence-hockey-bundle.json` |
+| Table F1 (web appendix) | `scripts/fig_computational_settings_table.py` | `pdf/computational_settings_table.pdf` | fixed content |
+| Table H1 (web appendix) | `scripts/fig_psid_hetro_comp_parameter_table.py` | `pdf/psid_hetro_comp_parameter_table.pdf` | `2026-07-13-bpp-hetero-mean-indep-bundle.json`, `bundle_psid_heteroscale.json` |
+
+The bundles are in `output/bundles/`, except `bpp_selection_table.json`
+(`output/data/`). The [run summary](#run-summary) traces each bundle back to
+the layer-2 tasks that produce it. The PSID standard errors (Table 4) and the
+confidence band (Figure 9) use the bootstrap replicates in
+`output/bundles/cells/_bpp_hetero_scale_ivi_bootstrap_k40_uncond/bootstrap_theta.json`.
+
+## References
+
+Balke, Neele, Stéphane Bonhomme, and Thibaut Lamadon. 2026. "Replication Data
+for: Indirect Variational Inference: Applications to Earnings Dynamics."
+Harvard Dataverse. https://doi.org/[DATAVERSE-DOI-PLACEHOLDER].
+
+Blundell, Richard, Luigi Pistaferri, and Ian Preston. 2008. "Consumption
+Inequality and Partial Insurance." *American Economic Review* 98 (5):
+1887–1921. https://doi.org/10.1257/aer.98.5.1887.
+
+Blundell, Richard, Luigi Pistaferri, and Ian Preston. 2026. "Replication Data
+for: Consumption Inequality and Partial Insurance." Version V2. Ann Arbor, MI:
+Inter-university Consortium for Political and Social Research [distributor],
+ICPSR–PSID Data Extract Repository. https://doi.org/10.3886/E210782V2.
+
+Panel Study of Income Dynamics, public use dataset. Produced and distributed
+by the Survey Research Center, Institute for Social Research, University of
+Michigan, Ann Arbor, MI ([YEAR-OF-DOWNLOAD-PLACEHOLDER]).
+
+## Appendix A: File inventory
+
+Every file in the package, except the per-figure tables above.
+
+### Top level
+
+| File | Purpose |
+|---|---|
+| `README.md`, `README.pdf` | This document (Markdown source and PDF) |
+| `LICENSE` | MIT (code) and CC BY 4.0 (results, documentation) |
+| `run_all.sh` | One-command replication |
+| `replicate.py` | Pipeline driver and figure registry |
+| `pyproject.toml` | Python project and dependencies |
+| `uv.lock` | Pinned Python environment (uv) |
+| `requirements.lock` | The same pins for pip |
+| `mise.toml` | Pinned tool versions (uv, Tectonic) and shortcut tasks |
+| `flake.nix`, `flake.lock` | Nix development shell (NixOS only) |
+| `scripthut.yaml` | Cluster environment and backend configuration for scripthut |
+| `.github/workflows/release.yml` | GitHub Actions job building layer 3 and attaching `figures.pdf` to a release |
+| `.gitignore` | Keeps data, environments and regenerated outputs out of git |
+| `data/raw/README.md` | Where to put the ICPSR input files, with checksums |
+| `notebooks/table2_vi_gaussian.ipynb` | Colab notebook rerunning one Table 2 estimation |
+| `workflows/hut.replication_<block>[_smoke].json` | Generated scripthut workflows for layers 1–2 (12 files: blocks `ar1n`, `hetero`, `hockey`, `timing`, `bpp`, `bpp_with_bootstrap`, each full and smoke); regenerate with `replicate.py hut` |
+
+### Layer 1: data (`scripts/`)
+
+| File | Purpose |
+|---|---|
+| `psid_bpp_build.py` | Port of BPP's sample selection; builds `output/data/bpp_y_matrix.npy` |
+| `psid_bpp_selection_table.py` | Sample statistics: BPP as published vs our selection vs the balanced panel |
+
+### Layer 2: estimation and simulation (`scripts/`)
+
+| File | Purpose |
+|---|---|
+| `bpp_hetero_scale_vi_mf.py`, `bpp_hetero_scale_vi_jn.py`, `bpp_hetero_scale_vi_sm.py` | VI fits of the heterogeneous-variance model on the PSID (mean-field, joint-normal, structured Markov posteriors) |
+| `bpp_hetero_scale_ivi_jn.py` | IVI fit of the heterogeneous-variance model on the PSID; also each bootstrap replicate |
+| `bpp_hetero_mean_indep_vi_jn.py`, `bpp_hetero_mean_indep_ivi_jn.py` | VI and IVI fits of the heterogeneous-mean model (Table H1) |
+| `_bpp_hetero_scale_ivi_bootstrap_aggregate.py` | Aggregates the bootstrap replicates |
+| `bpp_hetero_scale_bundle.py` | Builds `bundle_psid_heteroscale.json` |
+| `_export_bpp_hetero_mean_indep_bundle.py` | Builds the heterogeneous-mean bundle |
+| `_simulation_ar1n_sweep.py`, `_ar1n_posterior_comparison.py` | AR(1)+normal simulation fits (Table 1) and their model definitions |
+| `_simulation_ar1n_mu1_profile.py`, `_simulation_ar1n_binding_mu1.py`, `_simulation_ar1n_quiver.py` | Likelihood/ELBO profile, binding function and quiver (Figures 3–5) |
+| `_export_ar1n_parameter_summary.py`, `_export_ar1n_mu1_profile_bundle.py`, `_export_ar1n_binding_mu1_bundle.py`, `_export_ar1n_quiver_bundle.py` | AR(1) bundles |
+| `_simulation_hockeystick_ivi_sweep.py`, `_export_hockeystick_parameter_summary.py` | Nonlinear (hockey-stick) model simulations (Table 2, Figure 7) |
+| `_contour_past_2period_imputed.py` | Posterior contours (Figure 6) |
+| `_time_to_convergence_hockey.py`, `_export_time_to_convergence_hockey_bundle.py`, `gpu_util.py` | VI vs SMC timing experiment (Table E1) and GPU-utilization sampler |
+| `_simulation_hetero_scale_ivi_sweep.py`, `_export_hetero_scale_parameter_summary.py` | Heterogeneity-model simulations (Table 3, Figure 8) |
+| `_scale_hetero_correlation_sweep.py`, `_scale_hetero_correlation_ivi.py` | Data-generating process and IVI helpers for the heterogeneity simulations |
+| `psid_smc_em_fivo_sinhz1.py`, `bpp_hockey_common.py` | Shared model and training helpers for the PSID fits |
+| `smc_smoothers.py`, `smc_truth_profile.py`, `climb_per_step.py`, `softplus_sinh_posterior_comparison.py` | Shared SMC smoothers and helpers imported by the experiments |
+
+### Layer 3: figures and tables (`scripts/`)
+
+| File | Purpose |
+|---|---|
+| `fig_<name>.py` (20 files) | One generator per figure or table; see the table above |
+| `fig_compile.py` | Compiles the fragments to PDF with Tectonic |
+| `fig_eps.py` | Exports the paper items to EPS (Ghostscript) |
+| `fig_preamble.tex` | The paper's LaTeX preamble, shared by all items |
+| `fig_parameter_names.md` | Maps parameter symbols in the tables to bundle keys |
+
+### Library (`mlye/`)
+
+| File | Purpose |
+|---|---|
+| `__init__.py`, `utils.py` | Package entry and utilities |
+| `seeding.py` | `seed_everything`, called by every stochastic entry point |
+| `models/full_model.py` | Full VI model: encoder, decoder and prior |
+| `models/encoders/` (`base.py`, `normal.py`, `markov.py`, `laplace.py`, `layers.py`, `__init__.py`) | Variational posteriors q(z \| y) |
+| `models/decoders/` (`base.py`, `ma.py`, `__init__.py`) | Emission distributions p(y \| z), including MA(1) |
+| `models/priors/` (`base.py`, `ar.py`, `markov.py`, `utils.py`, `__init__.py`) | Priors: AR(1) and nonlinear Markov |
+| `models/__init__.py` | Models package |
+| `eval/` (`smc.py`, `fivo.py`, `__init__.py`) | Particle filter and FIVO for likelihood evaluation |
+
+### Tests (`tests/`)
+
+| File | Purpose |
+|---|---|
+| `test_replication.py` | Pipeline graph, bundle coverage, seeding, environment pins, workflows, figure registry |
+| `test_eval_sinh_arcsinh_normal.py` | Unit test of the sinh-arcsinh density |
+| `conftest.py`, `__init__.py` | Pytest configuration |
+
+### Estimation bundles
+
+| Bundle (`output/bundles/`) | Block | Contents | Used in |
+|---|---|---|---|
+| `ar1n_parameter_summary.json` | ar1n | AR(1)+normal simulation: 13 VI / IVI / MLE fits | Table 1 |
+| `ar1n_mu1_profile_bundle.json` | ar1n | ELBO/likelihood profile in μ₁ (20-point grid) | Figure 4 |
+| `ar1n_binding_mu1_bundle.json` | ar1n | IVI binding function in μ₁ (15-point grid) | Figure 5 |
+| `ar1n_quiver_bundle.json` | ar1n | Binding-function quiver on the (μ₁, log σ_ε) plane | Figure 3 |
+| `hockeystick_parameter_summary.json` | hockey | Nonlinear model simulation, T = 6 | Table 2, Figure 7 |
+| `hockeystick_parameter_summary_longt.json` | hockey | Nonlinear model simulation, T = 40 IVI | Table 2 |
+| `contour_bundle.json` | hockey | Imputed-posterior contours | Figure 6 |
+| `time-to-convergence-hockey-bundle.json` | timing | VI vs SMC time to convergence | Table E1 |
+| `hetero_scale_parameter_summary.json` | hetero | Heterogeneity-model simulation: 6 fits | Table 3, Figure 8 |
+| `bundle_psid_heteroscale.json` | bpp | PSID heterogeneous-variance model: VI (3 posteriors), IVI, bootstrap | Table 4, Figures 9–12, Table H1 |
+| `2026-07-13-bpp-hetero-mean-indep-bundle.json` | bpp | PSID heterogeneous-mean model vs heterogeneous-variance model | Table H1 |
+| `cells/_bpp_hetero_scale_ivi_bootstrap_k40/bootstrap_theta.json` | bpp | Conditional bootstrap (100 replicates) | Table 4 (reference) |
+| `cells/_bpp_hetero_scale_ivi_bootstrap_k40_uncond/bootstrap_theta.json` | bpp | Unconditional bootstrap (100 replicates) | Table 4, Figure 9 |
+| `output/data/bpp_selection_table.json` | data | PSID sample statistics | Table B1 |
+
+## Appendix B: Pipeline management
 
 ### Published outputs and comparisons
 
@@ -532,69 +752,3 @@ uv run python replicate.py summary --workdir /scratch/rep1 --readme
 
 Omit `--workdir` to use the manifests in this repository. This updates only
 the generated run-summary block in this README.
-
-### Seeds and determinism
-
-- Every stochastic entry point calls `mlye.seeding.seed_everything` before any
-  draw. It seeds python, numpy and torch (CPU and CUDA), turns on
-  `torch.use_deterministic_algorithms`, disables cuDNN benchmarking, and sets
-  `CUBLAS_WORKSPACE_CONFIG`.
-- Each script then sets explicit, recorded seeds at each stage:
-  - simulated panel: `OBS_SEED=11`
-  - common-random-number draws: `NOISE_SEED=12345`
-  - encoder init: `VI_SEED=11007`
-  - NaN-retry sequence: `VI_SEED + i`
-  - BPP fits: `*_SEED=11`
-  - bootstrap: resample seed `31000+b`; the unconditional bootstrap also uses `SEED=5000+b` and `NOISE_SEED=900000+b`
-- `replicate.py` passes all of these explicitly and sets `PYTHONHASHSEED=0`.
-- Rerunning on the same GPU model, driver and torch build gives bitwise-identical outputs.
-- Across GPU models (the originals ran on H100 and L40S), floating-point
-  reduction order differs, so results agree only to optimisation precision.
-- Time-to-convergence wall clocks depend on the hardware. The originals ran on
-  pythia `standard_l40s`.
-
-### Data provenance and checksums
-
-The only external input is the PSID extract shipped with Blundell, Pistaferri
-and Preston (2008, AER), ICPSR study 210782. Access is free with an ICPSR
-account, but the files cannot be redistributed and are not included here.
-Only layer 1 and the empirical (`bpp`) block require them; the simulations
-and figures built from published bundles do not.
-
-Place the three files in `data/raw/`, or point `BPP_EXT` to their directory.
-Their SHA-256 checksums are:
-
-```text
-c1d1949748e224f03b80803b01ea7775cb043cae1da5e89a8717452591ecfd41  data.dta
-0af8a9b32b1b6d3c3d80e2f0830f662bf82c23f1d51a3c27d601f07efb17af81  tax9192.dta
-7044d5511d7a3caa079688fe3513043907162373403f7dd53bfeaf1fa2a4cd9b  natpr.dta
-```
-
-The pipeline starts from BPP's prepared household-year panel, `data.dta`.
-BPP built it from raw PSID family files (1968–1992) and the 1968–97 individual
-file using `create1_AER.do` and `create2_AER.do` in the same ICPSR package.
-That upstream step is BPP's and is not re-implemented here.
-
-After running layer 1, check the earnings matrix with:
-
-```bash
-uv run python replicate.py verify-data
-```
-
-The expected SHA-256 is
-`c9cda89925b3c35ae67ebaac8a3dfb748ac55d76750d609c0879d61555a9ffae`.
-
-### Environment details
-
-The package is tested on Linux x86-64 (NixOS and RHEL 8 on pythia); other
-platforms are untested. `uv.lock` pins the Python packages, including torch
-2.13.0 with CUDA 13 libraries. `requirements.lock` provides the same pins for
-pip. The Python environment takes about 5 GB. `mise.toml` pins uv 0.12.0 and
-Tectonic 0.17.0. Tectonic downloads about 50 MB of packages from its versioned
-TeX bundle on first use.
-
-On NixOS, PyTorch needs `/run/opengl-driver/lib` and 64-bit `libstdc++` and
-`libz` on `LD_LIBRARY_PATH`. `nix develop` supplies the driver path and
-`libstdc++`; also make `libz` available. Set
-`TRITON_LIBCUDA_PATH=/run/opengl-driver/lib` so Triton can find `libcuda`
-without `ldconfig`.

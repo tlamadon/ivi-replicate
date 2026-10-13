@@ -30,6 +30,10 @@ published outputs are tracked at those same paths. See README.md.
   builds all figures from output/bundles in ~2 min;
   `uv run pytest` for the consistency checks.
 - Do not commit the local `figures/` working folder (git-ignored).
+- README.md follows the Social Science Data Editors template (JOLE). After
+  editing it, rebuild README.pdf: `nix shell nixpkgs#pandoc -c scripts/readme_pdf.sh`.
+- Never commit PSID data: inputs live in git-ignored `data/raw/`;
+  `run_all.sh` is the one-command replication.
 
 Local GPU (NixOS): run inside `nix develop`, add a 64-bit zlib to
 LD_LIBRARY_PATH, and set `TRITON_LIBCUDA_PATH=/run/opengl-driver/lib`.
