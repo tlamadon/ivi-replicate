@@ -22,7 +22,9 @@ This package reproduces every estimate, figure and table of *Indirect
 Variational Inference: Applications to Earnings Dynamics* by Neele Balke,
 Stéphane Bonhomme and Thibaut Lamadon (Journal of Labor Economics;
 [arXiv:2607.15168](https://arxiv.org/abs/2607.15168)). The code is in Python
-(PyTorch for estimation, numpy and Tectonic for figures and tables).
+(PyTorch for estimation, numpy and Tectonic for figures and tables). The
+package is archived in the Journal of Labor Economics collection on Harvard
+Dataverse, [doi:10.7910/DVN/X7CAT0](https://doi.org/10.7910/DVN/X7CAT0).
 
 The paper has two parts:
 
@@ -507,7 +509,7 @@ confidence band (Figure 9) use the bootstrap replicates in
 
 Balke, Neele, Stéphane Bonhomme, and Thibaut Lamadon. 2026. "Replication Data
 for: Indirect Variational Inference: Applications to Earnings Dynamics."
-Harvard Dataverse. https://doi.org/[DATAVERSE-DOI-PLACEHOLDER].
+Harvard Dataverse. https://doi.org/10.7910/DVN/X7CAT0.
 
 Blundell, Richard, Luigi Pistaferri, and Ian Preston. 2008. "Consumption
 Inequality and Partial Insurance." *American Economic Review* 98 (5):

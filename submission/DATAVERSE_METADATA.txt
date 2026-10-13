@@ -132,6 +132,6 @@ Upload:  Dataverse unpacks a .zip on upload into individual files, keeping
          Check after upload that README.pdf sits at the top level.
 
 After publishing:
-  1. Copy the dataset DOI into README.md (References, [DATAVERSE-DOI-PLACEHOLDER])
+  1. [done 2026-10-13: doi:10.7910/DVN/X7CAT0] Copy the dataset DOI into README.md (References)
      and rebuild README.pdf (scripts/readme_pdf.sh).
   2. Cite the dataset DOI in the paper (data citation in text and references).
